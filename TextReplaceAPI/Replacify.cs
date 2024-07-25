@@ -1,4 +1,5 @@
-﻿using TextReplaceAPI.Core.Helpers;
+﻿using TextReplaceAPI.Core.AhoCorasick;
+using TextReplaceAPI.Core.Helpers;
 using TextReplaceAPI.Core.Validation;
 using TextReplaceAPI.Data;
 using TextReplaceAPI.Exceptions;
@@ -22,11 +23,15 @@ namespace TextReplaceAPI
             set { _sourceFiles = value; }
         }
 
+        private AhoCorasickStringSearcher? _matcher = null;
+
         /// <summary>
         /// Initializes a Dictionary<string, string> of replace phrases and an
         /// IEnumberable<SourceFile> containing the source and output file names.
         /// </summary>
         /// <param name="replacementsFileName"></param>
+        /// <param name="sourceFileNames"></param>
+        /// <param name="outputFileNames"></param>
         /// <exception cref="InvalidFileTypeException">
         /// A file type is not supported. See documentation for a list of supported file types.
         /// </exception>
@@ -59,12 +64,66 @@ namespace TextReplaceAPI
         }
 
         /// <summary>
+        /// Initializes a Dictionary<string, string> of replace phrases, an IEnumberable<SourceFile>
+        /// containing the source and output file names, and the Aho-Corasick matcher if the
+        /// preGenerateMatcher argument is true.
+        /// 
+        /// Only use this contructor if you would like to pre-generate the Aho-Corasick matcher.
+        /// This front-loads much of the processing time upon instantiation of this class's object
+        /// rather than when the PerformReplacements method is called.
+        /// </summary>
+        /// <param name="replacementsFileName"></param>
+        /// <param name="sourceFileNames"></param>
+        /// <param name="outputFileNames"></param>
+        /// <param name="preGenerateMatcher"></param>
+        /// <param name="caseSensitive"></param>
+        /// <exception cref="InvalidFileTypeException">
+        /// A file type is not supported. See documentation for a list of supported file types.
+        /// </exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="PathTooLongException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public Replacify(
+            string replacementsFileName,
+            IEnumerable<string> sourceFileNames,
+            IEnumerable<string> outputFileNames,
+            bool preGenerateMatcher,
+            bool caseSensitive)
+        {
+            _replacePhrases = ParseReplacements(replacementsFileName);
+
+            if (AreSourceFileTypesValid(sourceFileNames) == false)
+            {
+                throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+            }
+
+            if (AreOutputFileTypesValid(sourceFileNames) == false)
+            {
+                throw new InvalidFileTypeException("Invalid output file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+            }
+
+            // zip the source file names and the output file names together and then combine the names into SourceFile objects
+            _sourceFiles = ZipSourceFiles(sourceFileNames, outputFileNames);
+
+            // generate the matcher
+            if (preGenerateMatcher)
+            {
+                GenerateAhoCorasickMatcher(ReplacePhrases, caseSensitive);
+            }
+        }
+
+        /// <summary>
         /// Searches through a list of source files, looking for instances of keys from 
         /// the ReplacePhrases dict, replacing them with the associated value, and then
         /// saving the resulting text off to a list of destination files.
         /// 
-        /// Note: if the "throwExceptions" flag is set to false and writing to one of the files failed,
-        /// the method will continue to write to the other files in the list.
+        /// If the "throwExceptions" flag is set to false and writing to one of the files failed,
+        /// the method will prevent the exception from bubbling up to the caller and continue
+        /// to write to the other files in the list.
         /// </summary>
         /// <param name="wholeWord"></param>
         /// <param name="caseSensitive"></param>
@@ -92,19 +151,12 @@ namespace TextReplaceAPI
             OutputFileStyling? styling = null,
             bool throwExceptions = true)
         {
-            if (throwExceptions)
-            {
-                // will throw exception if something goes wrong
-                OutputHelper.PerformReplacementsThrowExceptions(
-                    replacePhrases, sourceFiles, wholeWord, caseSensitive, preserveCase, styling);
-                return true;
-            }
-
-            // catches any exceptions if something goes wrong and continues to write to
-            // the remaining files. will only throw an ArgumentException if SourceFiles is empty.
-            // returns false if something went wrong, true if all files wrote successfully.
+            // If throwExceptions is true, PerformReplacements() will allow exceptions to bubble up to the caller.
+            // If it is false, PerformReplacements() will catch any exceptions and continues to write to
+            // the remaining files. It will only allow an ArgumentException to bubble up to the caller if SourceFiles is empty.
+            // This returns false if something went wrong, and true if all files wrote successfully.
             return OutputHelper.PerformReplacements(
-                replacePhrases, sourceFiles, wholeWord, caseSensitive, preserveCase, styling);
+                replacePhrases, sourceFiles, wholeWord, caseSensitive, preserveCase, throwExceptions, styling);
         }
 
         /// <summary>
@@ -112,7 +164,7 @@ namespace TextReplaceAPI
         /// the ReplacePhrases dict, replacing them with the associated value, and then
         /// saving the resulting text off to a list of destination files.
         /// 
-        /// Note: if the "throwExceptions" flag is set to false and writing to one of the files failed,
+        /// If the "throwExceptions" flag is set to false and writing to one of the files failed,
         /// the method will continue to write to the other files in the list.
         /// </summary>
         /// <param name="wholeWord"></param>
@@ -139,19 +191,19 @@ namespace TextReplaceAPI
             OutputFileStyling? styling = null,
             bool throwExceptions = true)
         {
-            if (throwExceptions)
-            {
-                // will throw exception if something goes wrong
-                OutputHelper.PerformReplacementsThrowExceptions(
-                    ReplacePhrases, SourceFiles, wholeWord, caseSensitive, preserveCase, styling);
-                return true;
-            }
+            // If throwExceptions is true, PerformReplacements() will allow exceptions to bubble up to the caller.
+            // If it is false, PerformReplacements() will catch any exceptions and continues to write to
+            // the remaining files. It will only allow an ArgumentException to bubble up to the caller if SourceFiles is empty.
+            // This returns false if something went wrong, and true if all files wrote successfully.
 
-            // catches any exceptions if something goes wrong and continues to write to
-            // the remaining files. will only throw an ArgumentException if SourceFiles is empty.
-            // returns false if something went wrong, true if all files wrote successfully.
+            // If the Aho-Corasick matcher was pre-generated, use that.
+            if (_matcher != null)
+            {
+                return OutputHelper.PerformReplacements(
+                    ReplacePhrases, SourceFiles, _matcher, wholeWord, preserveCase, throwExceptions, styling);
+            }
             return OutputHelper.PerformReplacements(
-                ReplacePhrases, SourceFiles, wholeWord, caseSensitive, preserveCase, styling);
+                ReplacePhrases, SourceFiles, wholeWord, caseSensitive, preserveCase, throwExceptions, styling);
         }
 
         /// <summary>
@@ -271,6 +323,26 @@ namespace TextReplaceAPI
         public static bool IsOutputFileTypeValid(string fileName)
         {
             return FileValidation.IsOutputFileTypeValid(fileName);
+        }
+
+        /// <summary>
+        /// Generates the Aho-Corasick matcher, which front-loads much of the processing time
+        /// rather than performing this operation when the PerformReplacements method is called.
+        /// </summary>
+        /// <param name="replacePhrases"></param>
+        /// <param name="caseSensitive"></param>
+        public void GenerateAhoCorasickMatcher(Dictionary<string, string> replacePhrases, bool caseSensitive)
+        {
+            _matcher = AhoCorasickMatcher.CreateMatcher(ReplacePhrases, caseSensitive);
+        }
+
+        /// <summary>
+        /// Clears the Aho-Corasick matcher, resulting in it being
+        /// generated within the PerformReplacements method.
+        /// </summary>
+        public void ClearAhoCorasickMatcher()
+        {
+            _matcher = null;
         }
     }
 }

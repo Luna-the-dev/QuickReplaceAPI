@@ -6,10 +6,12 @@ using TextReplaceAPI.Core.AhoCorasick;
 using TextReplaceAPI.Core.Validation;
 using TextReplaceAPI.Data;
 using TextReplaceAPI.Exceptions;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace TextReplaceAPI.Core.Helpers
 {
-    public class OutputHelper
+    internal static class OutputHelper
     {
         /// <summary>
         /// Searches through a list of source files, looking for instances of keys from 
@@ -24,6 +26,7 @@ namespace TextReplaceAPI.Core.Helpers
         /// <param name="wholeWord"></param>
         /// <param name="caseSensitive"></param>
         /// <param name="preserveCase"></param>
+        /// <param name="throwExceptions"></param>
         /// <param name="styling"></param>
         /// <returns>True if all files were written successfully, false if at least one file failed.</returns>
         /// <exception cref="ArgumentException"></exception>
@@ -33,6 +36,7 @@ namespace TextReplaceAPI.Core.Helpers
             bool wholeWord,
             bool caseSensitive,
             bool preserveCase,
+            bool throwExceptions,
             OutputFileStyling? styling = null)
         {
             if (sourceFiles.Any() == false)
@@ -49,16 +53,94 @@ namespace TextReplaceAPI.Core.Helpers
             }
             matcher.CreateFailureFunction();
 
+            // returns true if no errors occurred. catches exceptions if throwExceptions = false
+            return WriteReplacementsToAllFiles(replacePhrases, sourceFiles, matcher, wholeWord, preserveCase, throwExceptions, styling);
+        }
+
+        /// <summary>
+        /// Searches through a list of source files, looking for instances of keys from 
+        /// the ReplacePhrases dict, replacing them with the associated value, and then
+        /// saving the resulting text off to a list of destination files.
+        /// 
+        /// Note: The matcher argument must be be instantiated correctly before use in this method.
+        /// It sould be created, then have had all replace phrase keys added to it with the
+        /// matcher.AddItem() method, then the failure function must be created with the
+        /// matcher.CreateFailureFunction() method.
+        /// 
+        /// Note: if writing to one of the files failed, the function will continue to
+        /// write to the other files in the list.
+        /// </summary>
+        /// <param name="replacePhrases"></param>
+        /// <param name="sourceFiles"></param>
+        /// <param name="matcher"></param>
+        /// <param name="wholeWord"></param>
+        /// <param name="preserveCase"></param>
+        /// <param name="throwExceptions"></param>
+        /// <param name="styling"></param>
+        /// <returns>True if all files were written successfully, false if at least one file failed.</returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static bool PerformReplacements(
+            Dictionary<string, string> replacePhrases,
+            IEnumerable<SourceFile> sourceFiles,
+            AhoCorasickStringSearcher matcher,
+            bool wholeWord,
+            bool preserveCase,
+            bool throwExceptions,
+            OutputFileStyling? styling = null)
+        {
+            if (sourceFiles.Any() == false)
+            {
+                throw new ArgumentException("No source files were supplied.");
+            }
+
+            // returns true if no errors occurred. catches exceptions if throwExceptions = false
+            return WriteReplacementsToAllFiles(replacePhrases, sourceFiles, matcher, wholeWord, preserveCase, throwExceptions, styling);
+        }
+
+        /// <summary>
+        /// Attempts to perform the replacements on all source files and write it to the associated destination files.
+        /// </summary>
+        /// <param name="replacePhrases"></param>
+        /// <param name="sourceFiles"></param>
+        /// <param name="matcher"></param>
+        /// <param name="wholeWord"></param>
+        /// <param name="preserveCase"></param>
+        /// <param name="throwExceptions"></param>
+        /// <param name="styling"></param>
+        /// <returns></returns>
+        private static bool WriteReplacementsToAllFiles(
+            Dictionary<string, string> replacePhrases,
+            IEnumerable<SourceFile> sourceFiles,
+            AhoCorasickStringSearcher matcher,
+            bool wholeWord,
+            bool preserveCase,
+            bool throwExceptions,
+            OutputFileStyling? styling = null)
+        {
+            if (throwExceptions)
+            {
+                // do the search on each file
+                foreach (var file in sourceFiles)
+                {
+                    file.NumOfReplacements = WriteReplacementsToFile(
+                        replacePhrases, file.SourceFileName, file.OutputFileName, matcher, wholeWord, preserveCase, styling);
+                }
+                return true;
+            }
+
             // do the search on each file
             bool didEverythingSucceed = true;
             foreach (var file in sourceFiles)
             {
-                int numOfReplacements = TryWriteReplacementsToFile(replacePhrases, file.SourceFileName, file.OutputFileName, matcher, wholeWord, preserveCase, styling);
+                int numOfReplacements = TryWriteReplacementsToFile(
+                    replacePhrases, file.SourceFileName, file.OutputFileName, matcher, wholeWord, preserveCase, styling);
+
                 if (numOfReplacements == -1)
                 {
                     didEverythingSucceed = false;
                     continue;
                 }
+
                 file.NumOfReplacements = numOfReplacements;
             }
 
@@ -66,50 +148,7 @@ namespace TextReplaceAPI.Core.Helpers
         }
 
         /// <summary>
-        /// Searches through a list of source files, looking for instances of keys from 
-        /// the ReplacePhrases dict, replacing them with the associated value, and then
-        /// saving the resulting text off to a list of destination files.
-        /// </summary>
-        /// <param name="replacePhrases"></param>
-        /// <param name="sourceFiles"></param>
-        /// <param name="wholeWord"></param>
-        /// <param name="caseSensitive"></param>
-        /// <param name="preserveCase"></param>
-        /// <exception cref="ArgumentException"></exception>
-        public static void PerformReplacementsThrowExceptions(
-            Dictionary<string, string> replacePhrases,
-            IEnumerable<SourceFile> sourceFiles,
-            bool wholeWord,
-            bool caseSensitive,
-            bool preserveCase,
-            OutputFileStyling? styling = null)
-        {
-            if (sourceFiles.Any() == false)
-            {
-                throw new ArgumentException("No source files were supplied.");
-            }
-
-            // construct the automaton and fill it with the phrases to search for
-            // also create a list of the replacement phrases to go alongside the 
-            AhoCorasickStringSearcher matcher = new AhoCorasickStringSearcher(caseSensitive);
-            foreach (var searchWord in replacePhrases)
-            {
-                matcher.AddItem(searchWord.Key);
-            }
-            matcher.CreateFailureFunction();
-
-            // do the search on each file
-            foreach (var file in sourceFiles)
-            {
-                file.NumOfReplacements = WriteReplacementsToFile(replacePhrases, file.SourceFileName, file.OutputFileName, matcher, wholeWord, preserveCase, styling);
-            }
-
-            return;
-        }
-
-        /// <summary>
-        /// Continually attempts to perform the replacements on a source file and write it to a destination file.
-        /// Will keep attempting until it is either successful or the RetryReplacementsOnFile flag is false.
+        /// Attempts to perform the replacements on a source file and write it to a destination file.
         /// </summary>
         /// <param name="replacePhrases"></param>
         /// <param name="src"></param>
