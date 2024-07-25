@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using TextReplaceAPI.Core.Validation;
+﻿using TextReplaceAPI.Core.Validation;
 using CsvHelper.Configuration;
 using CsvHelper;
 using System.Globalization;
@@ -10,77 +9,10 @@ using ClosedXML.Excel;
 
 namespace TextReplaceAPI.MVVM.Model
 {
-    internal class ReplaceData
+    internal static class ReplacementsHelper
     {
-        // key is the phrase to replace, value is what it is being replaced with
-        private Dictionary<string, string> _replacePhrases = [];
-        public Dictionary<string, string> ReplacePhrases
-        {
-            get { return _replacePhrases; }
-            set { _replacePhrases = value; }
-        }
-
-        /// <summary>
-        /// Parses through a file for replace phrases and sets the ReplacePhrases List/Dict.
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="dryRun"></param>
-        /// <returns>True if new replace phrases were successfully set from the file.</returns>
-        public bool SetNewReplacePhrasesFromFile(string fileName, bool dryRun = false)
-        {
-            try
-            {
-                // check to see if file name is valid so that the phrases can be parsed
-                // before setting the file name
-                if (FileValidation.IsInputFileReadable(fileName) == false)
-                {
-                    throw new IOException("Input file is not readable in SetNewReplaceFileFromUser().");
-                }
-
-                // if caller specified that this should be a dry run,
-                // then dont actually assign the parsed data to the dict
-                if (dryRun)
-                {
-                    // will throw InvalidOperationException if it returns a dict of count == 0
-                    ParseReplacements(fileName);
-                    return true;
-                }
-
-                // parse through phrases and attempt to save them
-                ReplacePhrases = ParseReplacements(fileName);
-
-                return true;
-            }
-            catch (IOException e)
-            {
-                Debug.WriteLine(e);
-                return false;
-            }
-            catch (InvalidOperationException e)
-            {
-                Debug.WriteLine(e);
-                return false;
-            }
-            catch (NotSupportedException e)
-            {
-                Debug.WriteLine(e);
-                return false;
-            }
-            catch (CsvHelper.MissingFieldException)
-            {
-                Debug.WriteLine("CsvHelper could not parse the file with the given delimiter.");
-                return false;
-            }
-            catch
-            {
-                Debug.WriteLine("Something unexpected happened in SetNewReplaceFileFromUser().");
-                return false;
-            }
-        }
-
         /// <summary>
         /// Parses the replacements from a file. Supports excel files as well as value-seperated files
-        /// Supported file types are: .csv, .tsv, .xlsx. and .txt
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns>
@@ -89,11 +21,6 @@ namespace TextReplaceAPI.MVVM.Model
         /// </returns>
         public static Dictionary<string, string> ParseReplacements(string fileName)
         {
-            if (FileValidation.IsReplaceFileTypeValid(fileName) == false)
-            {
-                throw new NotSupportedException($"File type {Path.GetExtension(fileName).ToLower()} is not supported.");
-            }
-
             var phrases = new Dictionary<string, string>();
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -125,10 +52,11 @@ namespace TextReplaceAPI.MVVM.Model
         /// Saves the replace phrases list to the file system, performing a sort if requested.
         /// Supported file types are: .csv, .tsv, .xlsx. and .txt
         /// </summary>
+        /// <param name="replacePhrases"></param>
         /// <param name="fileName"></param>
         /// <param name="shouldSort"></param>
         /// <param name="delimiter"></param>
-        public void SavePhrasesToFile(string fileName, bool shouldSort = false, string delimiter = "")
+        public static void SavePhrasesToFile(Dictionary<string, string> replacePhrases, string fileName, bool shouldSort = false, string delimiter = "")
         {
             if (FileValidation.IsReplaceFileTypeValid(fileName) == false)
             {
@@ -154,17 +82,23 @@ namespace TextReplaceAPI.MVVM.Model
 
             if (FileValidation.IsExcelFile(fileName))
             {
-                SavePhrasesToExcel(fileName, shouldSort);
+                SavePhrasesToExcel(replacePhrases, fileName, shouldSort);
             }
             else
             {
-                SavePhrasesToCsv(fileName, shouldSort, delimiter);
+                SavePhrasesToCsv(replacePhrases, fileName, shouldSort, delimiter);
             }
         }
 
-        private void SavePhrasesToExcel(string fileName, bool shouldSort)
+        /// <summary>
+        /// Saves the replace phrases list to the file system as an excel spreadsheet, performing a sort if requested.
+        /// </summary>
+        /// <param name="replacePhrases"></param>
+        /// <param name="fileName"></param>
+        /// <param name="shouldSort"></param>
+        private static void SavePhrasesToExcel(Dictionary<string, string> replacePhrases, string fileName, bool shouldSort)
         {
-            var phrases = (shouldSort) ? ReplacePhrases.OrderBy(x => x.Key).ToList() : ReplacePhrases.ToList();
+            var phrases = (shouldSort) ? replacePhrases.OrderBy(x => x.Key).ToList() : replacePhrases.ToList();
 
             using var workbook = new XLWorkbook();
             // limit the length of the worksheet name because excel doesnt allow anything over 31 chars
@@ -186,7 +120,14 @@ namespace TextReplaceAPI.MVVM.Model
             workbook.SaveAs(fileName);
         }
 
-        private void SavePhrasesToCsv(string fileName, bool shouldSort, string delimiter)
+        /// <summary>
+        /// Saves the replace phrases list to the file system as a delimiter-seperated file, performing a sort if requested.
+        /// </summary>
+        /// <param name="replacePhrases"></param>
+        /// <param name="fileName"></param>
+        /// <param name="shouldSort"></param>
+        /// <param name="delimiter"></param>
+        private static void SavePhrasesToCsv(Dictionary<string, string> replacePhrases, string fileName, bool shouldSort, string delimiter)
         {
             using var writer = new StreamWriter(fileName);
             var csvConfig = new CsvConfiguration(CultureInfo.CurrentCulture)
@@ -199,11 +140,11 @@ namespace TextReplaceAPI.MVVM.Model
             using var csvWriter = new CsvWriter(writer, csvConfig);
             if (shouldSort)
             {
-                csvWriter.WriteRecords(ReplacePhrases.OrderBy(x => x.Key));
+                csvWriter.WriteRecords(replacePhrases.OrderBy(x => x.Key));
             }
             else
             {
-                csvWriter.WriteRecords(ReplacePhrases);
+                csvWriter.WriteRecords(replacePhrases);
             }
         }
     }

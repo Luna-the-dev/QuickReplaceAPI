@@ -4,7 +4,7 @@ using Wordprocessing = DocumentFormat.OpenXml.Wordprocessing;
 
 namespace TextReplaceAPI.Core.Data
 {
-    internal class OutputFileStyling
+    public class OutputFileStyling
     {
         public bool Bold { get; set; }
 

@@ -105,6 +105,21 @@ namespace TextReplaceAPI.Core.Validation
             };
         }
 
+        /// <summary>
+        /// Checks to see if the output file is of a supported type
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns>False if the file type is not supported</returns>
+        public static bool IsOutputFileTypeValid(string fileName)
+        {
+            string extension = Path.GetExtension(fileName).ToLower();
+            return extension switch
+            {
+                ".csv" or ".tsv" or ".xlsx" or ".txt" or ".text" or ".docx" => true,
+                _ => false
+            };
+        }
+
         public static bool IsTextFile(string fileName)
         {
             if (Path.GetExtension(fileName).Equals(".txt", StringComparison.CurrentCultureIgnoreCase) ||
