@@ -7,7 +7,7 @@ using ExcelDataReader;
 using System.Data;
 using ClosedXML.Excel;
 
-namespace TextReplaceAPI.MVVM.Model
+namespace TextReplaceAPI.Core.Helpers
 {
     internal static class ReplacementsHelper
     {
@@ -98,7 +98,7 @@ namespace TextReplaceAPI.MVVM.Model
         /// <param name="shouldSort"></param>
         private static void SavePhrasesToExcel(Dictionary<string, string> replacePhrases, string fileName, bool shouldSort)
         {
-            var phrases = (shouldSort) ? replacePhrases.OrderBy(x => x.Key).ToList() : replacePhrases.ToList();
+            var phrases = shouldSort ? replacePhrases.OrderBy(x => x.Key).ToList() : replacePhrases.ToList();
 
             using var workbook = new XLWorkbook();
             // limit the length of the worksheet name because excel doesnt allow anything over 31 chars

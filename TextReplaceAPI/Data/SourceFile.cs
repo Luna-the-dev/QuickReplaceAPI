@@ -1,4 +1,4 @@
-﻿namespace TextReplaceAPI.Core.Data
+﻿namespace TextReplaceAPI.Data
 {
     public record SourceFile
     {

@@ -1,6 +1,7 @@
-﻿using TextReplaceAPI.Core.Data;
+﻿using TextReplaceAPI.Core.Helpers;
 using TextReplaceAPI.Core.Validation;
-using TextReplaceAPI.MVVM.Model;
+using TextReplaceAPI.Data;
+using TextReplaceAPI.Exceptions;
 
 namespace TextReplaceAPI
 {
@@ -22,13 +23,20 @@ namespace TextReplaceAPI
         }
 
         /// <summary>
-        /// Initializes the Replacify class.
+        /// Initializes a Dictionary<string, string> of replace phrases and an
+        /// IEnumberable<SourceFile> containing the source and output file names.
         /// </summary>
         /// <param name="replacementsFileName"></param>
-        /// <exception cref="IOException"></exception>
+        /// <exception cref="InvalidFileTypeException">
+        /// A file type is not supported. See documentation for a list of supported file types.
+        /// </exception>
         /// <exception cref="InvalidOperationException"></exception>
-        /// <exception cref="NotSupportedException"></exception>
-        /// <exception cref="CsvHelper.MissingFieldException"></exception>
+        /// <exception cref="PathTooLongException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public Replacify(
             string replacementsFileName,
             IEnumerable<string> sourceFileNames,
@@ -38,12 +46,12 @@ namespace TextReplaceAPI
 
             if (AreSourceFileTypesValid(sourceFileNames) == false)
             {
-                throw new NotSupportedException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+                throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
             }
 
             if (AreOutputFileTypesValid(sourceFileNames) == false)
             {
-                throw new NotSupportedException("Invalid output file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+                throw new InvalidFileTypeException("Invalid output file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
             }
 
             // zip the source file names and the output file names together and then combine the names into SourceFile objects
@@ -63,8 +71,21 @@ namespace TextReplaceAPI
         /// <param name="preserveCase"></param>
         /// <param name="styling"></param>
         /// <param name="throwExceptions"></param>
-        /// <returns></returns>
-        public bool PerformReplacements(
+        /// <returns>True is all replacements were made successfully, false if something went wrong.</returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="PathTooLongException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <exception cref="System.Security.SecurityException"></exception>
+        /// <exception cref="InvalidXmlStructureException">
+        /// The XML data within a .docx or .xlsx file has an incorrect structure and could not be parsed.
+        /// </exception>
+        public static bool PerformReplacements(
+            Dictionary<string, string> replacePhrases,
+            IEnumerable<SourceFile> sourceFiles,
             bool wholeWord,
             bool caseSensitive,
             bool preserveCase,
@@ -74,16 +95,16 @@ namespace TextReplaceAPI
             if (throwExceptions)
             {
                 // will throw exception if something goes wrong
-                OutputData.PerformReplacementsThrowExceptions(
-                    ReplacePhrases, SourceFiles, wholeWord, caseSensitive, preserveCase, styling);
+                OutputHelper.PerformReplacementsThrowExceptions(
+                    replacePhrases, sourceFiles, wholeWord, caseSensitive, preserveCase, styling);
                 return true;
             }
 
             // catches any exceptions if something goes wrong and continues to write to
             // the remaining files. will only throw an ArgumentException if SourceFiles is empty.
             // returns false if something went wrong, true if all files wrote successfully.
-            return OutputData.PerformReplacements(
-                ReplacePhrases, SourceFiles, wholeWord, caseSensitive, preserveCase, styling);
+            return OutputHelper.PerformReplacements(
+                replacePhrases, sourceFiles, wholeWord, caseSensitive, preserveCase, styling);
         }
 
         /// <summary>
@@ -100,9 +121,18 @@ namespace TextReplaceAPI
         /// <param name="styling"></param>
         /// <param name="throwExceptions"></param>
         /// <returns>True is all replacements were made successfully, false if something went wrong.</returns>
-        public static bool PerformReplacements(
-            Dictionary<string, string> replacePhrases,
-            IEnumerable<SourceFile> sourceFiles,
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="PathTooLongException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <exception cref="System.Security.SecurityException"></exception>
+        /// <exception cref="InvalidXmlStructureException">
+        /// The XML data within a .docx or .xlsx file has an incorrect structure and could not be parsed.
+        /// </exception>
+        public bool PerformReplacements(
             bool wholeWord,
             bool caseSensitive,
             bool preserveCase,
@@ -112,16 +142,16 @@ namespace TextReplaceAPI
             if (throwExceptions)
             {
                 // will throw exception if something goes wrong
-                OutputData.PerformReplacementsThrowExceptions(
-                    replacePhrases, sourceFiles, wholeWord, caseSensitive, preserveCase, styling);
+                OutputHelper.PerformReplacementsThrowExceptions(
+                    ReplacePhrases, SourceFiles, wholeWord, caseSensitive, preserveCase, styling);
                 return true;
             }
 
             // catches any exceptions if something goes wrong and continues to write to
             // the remaining files. will only throw an ArgumentException if SourceFiles is empty.
             // returns false if something went wrong, true if all files wrote successfully.
-            return OutputData.PerformReplacements(
-                replacePhrases, sourceFiles, wholeWord, caseSensitive, preserveCase, styling);
+            return OutputHelper.PerformReplacements(
+                ReplacePhrases, SourceFiles, wholeWord, caseSensitive, preserveCase, styling);
         }
 
         /// <summary>
@@ -133,12 +163,21 @@ namespace TextReplaceAPI
         /// A dictionary of pairs of the values from the file. If one of the lines in the file has an
         /// incorrect number of values or if the operation fails for another reason, return an empty list.
         /// </returns>
-        /// <exception cref="NotSupportedException"></exception>
+        /// <exception cref="InvalidFileTypeException">
+        /// A file type is not supported. See documentation for a list of supported file types.
+        /// </exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="PathTooLongException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public static Dictionary<string, string> ParseReplacements(string fileName)
         {
             if (FileValidation.IsReplaceFileTypeValid(fileName) == false)
             {
-                throw new NotSupportedException($"File type {Path.GetExtension(fileName).ToLower()} is not supported as a replacements file.");
+                throw new InvalidFileTypeException($"File type {Path.GetExtension(fileName).ToLower()} is not supported as a replacements file.");
             }
 
             return ReplacementsHelper.ParseReplacements(fileName);

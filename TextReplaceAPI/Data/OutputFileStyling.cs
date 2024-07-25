@@ -2,7 +2,7 @@
 using Spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
 using Wordprocessing = DocumentFormat.OpenXml.Wordprocessing;
 
-namespace TextReplaceAPI.Core.Data
+namespace TextReplaceAPI.Data
 {
     public class OutputFileStyling
     {

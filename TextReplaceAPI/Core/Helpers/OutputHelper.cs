@@ -4,11 +4,12 @@ using Spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using TextReplaceAPI.Core.AhoCorasick;
 using TextReplaceAPI.Core.Validation;
-using TextReplaceAPI.Core.Data;
+using TextReplaceAPI.Data;
+using TextReplaceAPI.Exceptions;
 
-namespace TextReplaceAPI.MVVM.Model
+namespace TextReplaceAPI.Core.Helpers
 {
-    public class OutputData
+    public class OutputHelper
     {
         /// <summary>
         /// Searches through a list of source files, looking for instances of keys from 
@@ -140,6 +141,8 @@ namespace TextReplaceAPI.MVVM.Model
         /// <param name="wholeWord"></param>
         /// <param name="preserveCase"></param>
         /// <returns>The number of replacements that were made. Returns -1 if an exception was thrown.</returns>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
         private static int WriteReplacementsToFile(Dictionary<string, string> replacePhrases,
             string src, string dest, AhoCorasickStringSearcher matcher, bool wholeWord, bool preserveCase, OutputFileStyling? styling = null)
         {
@@ -301,6 +304,7 @@ namespace TextReplaceAPI.MVVM.Model
         /// <param name="matcher"></param>
         /// <param name="isWholeWord"></param>
         /// <param name="isPreserveCase"></param>
+        /// <exception cref="InvalidXmlStructureException"></exception>
         private static int ReadFromDocxWriteToTextCsvTsv(Dictionary<string, string> replacePhrases,
             string src, string dest, AhoCorasickStringSearcher matcher, bool isWholeWord, bool isPreserveCase)
         {
@@ -312,7 +316,7 @@ namespace TextReplaceAPI.MVVM.Model
 
             if (document.MainDocumentPart == null || document.MainDocumentPart.Document.Body == null)
             {
-                throw new NullReferenceException("ReadFromDocxWriteToTextCsvTsv(): MainDocumentPart or its body is null");
+                throw new InvalidXmlStructureException("MainDocumentPart or its body is null");
             }
 
             var paragraphs = document.MainDocumentPart.Document.Body.Descendants<Wordprocessing.Paragraph>();
@@ -348,6 +352,7 @@ namespace TextReplaceAPI.MVVM.Model
         /// <param name="matcher"></param>
         /// <param name="isWholeWord"></param>
         /// <param name="isPreserveCase"></param>
+        /// <exception cref="InvalidXmlStructureException"></exception>
         private static int ReadFromDocxWriteToDocx(
             Dictionary<string, string> replacePhrases,
             string src, string dest,
@@ -366,7 +371,7 @@ namespace TextReplaceAPI.MVVM.Model
 
             if (document.MainDocumentPart == null || document.MainDocumentPart.Document.Body == null)
             {
-                throw new NullReferenceException("ReadFromDocxWriteToDocx(): MainDocumentPart or its body is null");
+                throw new InvalidXmlStructureException("MainDocumentPart or its body is null");
             }
 
             var paragraphs = document.MainDocumentPart.Document.Body.Descendants<Wordprocessing.Paragraph>();
@@ -378,7 +383,7 @@ namespace TextReplaceAPI.MVVM.Model
                 // list of new runs that make up the paragraph
                 // if there is no custom styling required, combine replacement runs with the run
                 // before them to cut down on the number of resultant runs
-                List<Wordprocessing.Run> newRuns = (styleReplacements) ?
+                List<Wordprocessing.Run> newRuns = styleReplacements ?
                     AhoCorasickHelper.GenerateDocxRuns(paragraph, replacePhrases, matcher,
                         styling, isWholeWord, isPreserveCase, out currNumOfMatches) :
                     AhoCorasickHelper.GenerateDocxRunsOriginalStyling(paragraph, replacePhrases, matcher,
@@ -412,6 +417,7 @@ namespace TextReplaceAPI.MVVM.Model
         /// <param name="matcher"></param>
         /// <param name="isWholeWord"></param>
         /// <param name="isPreserveCase"></param>
+        /// <exception cref="InvalidXmlStructureException"></exception>
         private static int ReadFromExcelWriteToExcel(Dictionary<string, string> replacePhrases,
             string src, string dest, AhoCorasickStringSearcher matcher, OutputFileStyling styling, bool isWholeWord, bool isPreserveCase)
         {
@@ -436,7 +442,7 @@ namespace TextReplaceAPI.MVVM.Model
 
             if (document.WorkbookPart == null || document.WorkbookPart.Workbook.Sheets == null)
             {
-                throw new NullReferenceException("ReadFromExcelWriteToExcel(): WorkbookPart or its sheets is null");
+                throw new InvalidXmlStructureException("WorkbookPart or its sheets is null");
             }
 
             WorkbookPart wbPart = document.WorkbookPart;
@@ -463,7 +469,7 @@ namespace TextReplaceAPI.MVVM.Model
                     // handle a cell of data type shared string
                     if (cell.DataType != null && cell.DataType == Spreadsheet.CellValues.SharedString)
                     {
-                        if (Int32.TryParse(cell.InnerText, out int id))
+                        if (int.TryParse(cell.InnerText, out int id))
                         {
                             var sharedStringItem = wbPart.SharedStringTablePart?.SharedStringTable.Elements<Spreadsheet.SharedStringItem>().ElementAt(id);
                             if (string.IsNullOrEmpty(sharedStringItem?.InnerText))
@@ -488,7 +494,7 @@ namespace TextReplaceAPI.MVVM.Model
 
                             bool wereReplacementsMade;
 
-                            var newRuns = (styleReplacements) ?
+                            var newRuns = styleReplacements ?
                                 AhoCorasickHelper.GenerateExcelRuns(
                                     sharedStringItem, replacePhrases, matcher, styling,
                                     isWholeWord, isPreserveCase, out currNumOfMatches, out wereReplacementsMade) :

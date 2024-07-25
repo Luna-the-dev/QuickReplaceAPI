@@ -1,6 +1,6 @@
 ﻿using CsvHelper.Configuration.Attributes;
 
-namespace TextReplaceAPI.Core.Data
+namespace TextReplaceAPI.Data
 {
     /// <summary>
     /// Wrapper class for the replace phrases dictionary.
