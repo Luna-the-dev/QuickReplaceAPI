@@ -4,10 +4,9 @@ using Spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using TextReplaceAPI.Core.AhoCorasick;
 using TextReplaceAPI.Core.Validation;
-using TextReplaceAPI.Data;
+using TextReplaceAPI.DataTypes;
 using TextReplaceAPI.Exceptions;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 
 namespace TextReplaceAPI.Core.Helpers
 {
@@ -122,6 +121,7 @@ namespace TextReplaceAPI.Core.Helpers
                 // do the search on each file
                 foreach (var file in sourceFiles)
                 {
+                    Debug.WriteLine(20);
                     file.NumOfReplacements = WriteReplacementsToFile(
                         replacePhrases, file.SourceFileName, file.OutputFileName, matcher, wholeWord, preserveCase, styling);
                 }
@@ -186,15 +186,17 @@ namespace TextReplaceAPI.Core.Helpers
             string src, string dest, AhoCorasickStringSearcher matcher, bool wholeWord, bool preserveCase, OutputFileStyling? styling = null)
         {
             styling ??= new OutputFileStyling();
-            int numOfReplacements = -1;
 
-            // create a directory for the generated file if it doesnt exist
+            if (File.Exists(src) == false)
+            {
+                throw new FileNotFoundException($"File \"{src}\" does not exist.");
+            }
+
             var destFile = new FileInfo(dest);
             if (destFile.Directory == null)
             {
                 throw new DirectoryNotFoundException("Destination file directory could not be parsed.");
             }
-            destFile.Directory.Create();
 
             // source file is csv, tsv, or text
             if (FileValidation.IsCsvTsvFile(src) || FileValidation.IsTextFile(src))
@@ -202,39 +204,46 @@ namespace TextReplaceAPI.Core.Helpers
                 // output file type:
                 if (FileValidation.IsCsvTsvFile(dest) || FileValidation.IsTextFile(dest))
                 {
-                    numOfReplacements = ReadFromTextCsvTsvWriteToTextCsvTsv(replacePhrases, src, dest, matcher, wholeWord, preserveCase);
+                    destFile.Directory.Create();
+                    int numOfReplacements = ReadFromTextCsvTsvWriteToTextCsvTsv(replacePhrases, src, dest, matcher, wholeWord, preserveCase);
+                    return numOfReplacements;
                 }
                 else if (FileValidation.IsDocxFile(dest))
                 {
-                    numOfReplacements = ReadFromTextCsvTsvWriteToDocx(replacePhrases, src, dest, matcher, styling, wholeWord, preserveCase);
+                    destFile.Directory.Create();
+                    int numOfReplacements = ReadFromTextCsvTsvWriteToDocx(replacePhrases, src, dest, matcher, styling, wholeWord, preserveCase);
+                    return numOfReplacements;
                 }
-                return numOfReplacements;
             }
 
             // source file is docx
-            if (FileValidation.IsDocxFile(src))
+            else if (FileValidation.IsDocxFile(src))
             {
                 // output file type:
                 if (FileValidation.IsCsvTsvFile(dest) || FileValidation.IsTextFile(dest))
                 {
-                    numOfReplacements = ReadFromDocxWriteToTextCsvTsv(replacePhrases, src, dest, matcher, wholeWord, preserveCase);
+                    destFile.Directory.Create();
+                    int numOfReplacements = ReadFromDocxWriteToTextCsvTsv(replacePhrases, src, dest, matcher, wholeWord, preserveCase);
+                    return numOfReplacements;
                 }
                 else if (FileValidation.IsDocxFile(dest))
                 {
-                    numOfReplacements = ReadFromDocxWriteToDocx(replacePhrases, src, dest, matcher, styling, wholeWord, preserveCase);
+                    destFile.Directory.Create();
+                    int numOfReplacements = ReadFromDocxWriteToDocx(replacePhrases, src, dest, matcher, styling, wholeWord, preserveCase);
+                    return numOfReplacements;
                 }
-                return numOfReplacements;
             }
 
             // if source file is excel, only write to excel.
             // doesnt really make sense to write from excel to docx or something
-            if (FileValidation.IsExcelFile(src))
+            else if (FileValidation.IsExcelFile(src) && FileValidation.IsExcelFile(dest))
             {
-                numOfReplacements = ReadFromExcelWriteToExcel(replacePhrases, src, dest, matcher, styling, wholeWord, preserveCase);
+                destFile.Directory.Create();
+                int numOfReplacements = ReadFromExcelWriteToExcel(replacePhrases, src, dest, matcher, styling, wholeWord, preserveCase);
                 return numOfReplacements;
             }
 
-            throw new NotSupportedException($"Replace operation not supported for file types {Path.GetExtension(src)} to {Path.GetExtension(src)}");
+            throw new NotSupportedException($"Replace operation not supported for file types \"{Path.GetExtension(src)}\" to \"{Path.GetExtension(src)}\"");
         }
 
         /// <summary>

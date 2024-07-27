@@ -1,0 +1,35 @@
+﻿Christian Norris
+email | phone number | location
+Work Experience
+Software Engineer/Scrum Master | ASRC Federal | June 2022-Present
+* Built, tested, and delivered a new large software component to a customer using Java, C++, and Python/JUnit for testing. A small team of myself and two others fulfilled this contract from start to finish.
+* Awarded a Certificate of Appreciation for designing and implementing an event processing system between Java, C++, and Ada using a pub/sub messaging system and a factory to perform type casting.
+* Led daily standup meetings for my team, planned Jira stories sprint-by-sprint, and worked closely alongside both engineers and testers to fulfill a contract’s requirements from start to finish.
+Associate Software Engineer/Video Content Specialist | Blitz.gg | August 2020-January 2022
+* Engineered a content recommendation algorithm leveraging Javascript and Node.Js while working with data engineers to optimize user parameters, leading to a significant boost in click-through rates.
+* Wrote, recorded, and edited video content for the 200+ million users using the Blitz.gg platform.
+Technical Skills & Abilities
+Desktop and Backend Development | 5-7 years
+* C++, Java, C# (with .NET), Python, C
+SQL and NoSQL databases | 4 years
+* PostgreSQL, MySQL, AWS, Azure, Google Cloud Platform, MongoDB
+________________
+Web and Mobile Development | 4 Years
+   * Languages: Javascript, TypeScript, HTML5, CSS3, Swift, PHP
+   * Frameworks: React, Node, Spring boot, Angular, Express, React Native, SwiftUI, UIKit
+Personal Projects
+Large-scale Text Replacement Desktop App
+   * Designed and created a desktop application and server API that uses a modified Aho-Corasick algorithm to swiftly perform high amounts of text replacements on large docx, xlsx, and txt files. Uses C# and WPF using the .NET framework, following the MVVM design pattern with a pub/sub messaging system.
+Multi-threaded Web and Proxy Server
+   * Built a client, proxy server, and multi-threaded web server built upon system-level C code that supports GET, HEAD, and PUT requests. The servers employ various techniques such as load balancing, persistent connections, and caching to improve performance.
+Desktop/Mobile Email Application
+   * Created an email application usable through any desktop or mobile web browser. Using the PERN stack, I built both the frontend and backend using modern tools such as Javascript React and Express.
+IOS Instant Messaging App
+   * Developed a native mobile app for iOS devices that allows users to create an account and chat with others in real-time via text, image, video, or audio. This is built upon popular Apple frameworks Swift and UIKit, and with Google Firebase used for databasing.
+Education
+University of California, Santa Cruz | 2022
+   * Bachelor of Science, Computer Science
+________________
+Fullerton College | 2020
+      * Associate of Science, Mathematics
+      * Associate of Science, Physics

@@ -1,0 +1,33 @@
+Christian Norris
+email | phone number | location
+Wrk Exp
+sw Eng/Scrum Master | ASRC Federal | June 2022-Present
+Built, tsted, and deled a new Lg sw component to a Cust using Java, C++, and Python/JUnit for tsting. A small Tm of myself and two others fulfilled this contract from start to finish.
+Awarded a Certificate of Appreciation for Dsgning and Impling an event Prcsing system Btwn Java, C++, and Ada using a pub/sub messaging system and a factory to perform type casting.
+Led daily standup meetings for my Tm, planned Jira stories sprint-by-sprint, and Wrked closely alongside both Engs and tsters to fulfill a contract’s Rqmts from start to finish.
+Associate sw Eng/Video Content Spclist | Blitz.gg | August 2020-January 2022
+Enged a content recmmndtn algorithm leveraging Javascript and Node.Js while Wrking w/ data Engs to Opt user parameters, Lding to a significant boost in click-through rates.
+Wrote, recorded, and edited video content for the 200+ million users using the Blitz.gg platform.
+Technical Skills & Abilities
+Desktop and Backend Dvlpmnt | 5-7 Yrs
+C++, Java, C# (w/ .NET), Python, C
+SQL and NoSQL DBs | 4 Yrs
+PostgreSQL, MySQL, AWS, Azure, Google Cloud Platform, MongoDB
+Web and Mobile Dvlpmnt | 4 Yrs
+langs: Javascript, TypeScript, HTML5, CSS3, Swift, PHP
+FrameWrks: React, Node, Spring boot, Angular, Express, React Native, SwiftUI, UIKit
+Personal Projs
+Lg-scale txt Replacement Desktop App
+Dsgned and created a desktop Ap and Svr API that uses a modified Aho-Corasick algorithm to swiftly perform high amounts of txt replacements on Lg docx, xlsx, and txt files. Uses C# and WPF using the .NET frameWrk, flwg the MVVM Dsgn pattern w/ a pub/sub messaging system.
+Multi-threaded Web and Proxy Svr
+Built a client, proxy Svr, and multi-threaded web Svr built upon system-level C code that spprts GET, HEAD, and PUT requests. The Svrs employ various techniques such as load balancing, persistent connections, and caching to improve performance.
+Desktop/Mobile Email Ap
+Created an email Ap usable through any desktop or mobile web browser. Using the PERN stack, I built both the frontend and backend using modern tools such as Javascript React and Express.
+IOS Instant Messaging App
+Dvlped a native mobile app for iOS devices that allows users to create an account and chat w/ others in real-time via txt, image, video, or audio. This is built upon popular Apple frameWrks Swift and UIKit, and w/ Google Firebase used for databasing.
+Edu
+University of California, Santa Cruz | 2022
+Bachelor of Science, Computer Science
+Fullerton College | 2020
+Associate of Science, Mathematics
+Associate of Science, Physics

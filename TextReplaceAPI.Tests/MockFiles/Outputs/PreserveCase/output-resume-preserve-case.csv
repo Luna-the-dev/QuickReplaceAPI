@@ -1,0 +1,35 @@
+Christian Norris
+email | phone number | location
+Wrk Exp
+Sw Eng/Scrum Master | ASRC Federal | June 2022-Present
+* Built, tsted, and deled a new lg sw component to a cust using Java, C++, and Python/JUnit for tsting. A small tm of myself and two others fulfilled this contract from start to finish.
+* Awarded a Certificate of Appreciation for dsgning and impling an event prcsing system btwn Java, C++, and Ada using a pub/sub messaging system and a factory to perform type casting.
+* Led daily standup meetings for my tm, planned Jira stories sprint-by-sprint, and wrked closely alongside both engs and tsters to fulfill a contract’s rqmts from start to finish.
+Associate Sw Eng/Video Content Spclist | Blitz.gg | August 2020-January 2022
+* Enged a content recmmndtn algorithm leveraging Javascript and Node.Js while wrking w/ data engs to opt user parameters, lding to a significant boost in click-through rates.
+* Wrote, recorded, and edited video content for the 200+ million users using the Blitz.gg platform.
+Technical Skills & Abilities
+Desktop and Backend Dvlpmnt | 5-7 yrs
+* C++, Java, C# (w/ .NET), Python, C
+SQL and NoSQL dBs | 4 yrs
+* PostgreSQL, MySQL, AWS, Azure, Google Cloud Platform, MongoDB
+________________
+Web and Mobile Dvlpmnt | 4 Yrs
+   * Langs: Javascript, TypeScript, HTML5, CSS3, Swift, PHP
+   * Framewrks: React, Node, Spring boot, Angular, Express, React Native, SwiftUI, UIKit
+Personal Projs
+Lg-scale Txt Replacement Desktop App
+   * Dsgned and created a desktop ap and svr API that uses a modified Aho-Corasick algorithm to swiftly perform high amounts of txt replacements on lg docx, xlsx, and txt files. Uses C# and WPF using the .NET framewrk, flwg the MVVM dsgn pattern w/ a pub/sub messaging system.
+Multi-threaded Web and Proxy Svr
+   * Built a client, proxy svr, and multi-threaded web svr built upon system-level C code that spprts GET, HEAD, and PUT requests. The svrs employ various techniques such as load balancing, persistent connections, and caching to improve performance.
+Desktop/Mobile Email Ap
+   * Created an email ap usable through any desktop or mobile web browser. Using the PERN stack, I built both the frontend and backend using modern tools such as Javascript React and Express.
+IOS Instant Messaging App
+   * Dvlped a native mobile app for iOS devices that allows users to create an account and chat w/ others in real-time via txt, image, video, or audio. This is built upon popular Apple framewrks Swift and UIKit, and w/ Google Firebase used for databasing.
+Edu
+University of California, Santa Cruz | 2022
+   * Bachelor of Science, Computer Science
+________________
+Fullerton College | 2020
+      * Associate of Science, Mathematics
+      * Associate of Science, Physics

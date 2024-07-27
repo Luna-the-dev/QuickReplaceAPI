@@ -1,7 +1,7 @@
 ﻿using TextReplaceAPI.Core.AhoCorasick;
 using TextReplaceAPI.Core.Helpers;
 using TextReplaceAPI.Core.Validation;
-using TextReplaceAPI.Data;
+using TextReplaceAPI.DataTypes;
 using TextReplaceAPI.Exceptions;
 
 namespace TextReplaceAPI
@@ -16,8 +16,8 @@ namespace TextReplaceAPI
             set { _replacePhrases = value; }
         }
 
-        private IEnumerable<SourceFile> _sourceFiles;
-        public IEnumerable<SourceFile> SourceFiles
+        private List<SourceFile> _sourceFiles;
+        public List<SourceFile> SourceFiles
         {
             get { return _sourceFiles; }
             set { _sourceFiles = value; }
@@ -54,7 +54,45 @@ namespace TextReplaceAPI
                 throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
             }
 
-            if (AreOutputFileTypesValid(sourceFileNames) == false)
+            if (AreOutputFileTypesValid(outputFileNames) == false)
+            {
+                throw new InvalidFileTypeException("Invalid output file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+            }
+
+            // zip the source file names and the output file names together and then combine the names into SourceFile objects
+            _sourceFiles = ZipSourceFiles(sourceFileNames, outputFileNames);
+        }
+
+        /// <summary>
+        /// Initializes a Dictionary<string, string> of replace phrases and an
+        /// IEnumberable<SourceFile> containing the source and output file names.
+        /// </summary>
+        /// <param name="replacements"></param>
+        /// <param name="sourceFileNames"></param>
+        /// <param name="outputFileNames"></param>
+        /// <exception cref="InvalidFileTypeException">
+        /// A file type is not supported. See documentation for a list of supported file types.
+        /// </exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="PathTooLongException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public Replacify(
+            Dictionary<string, string> replacements,
+            IEnumerable<string> sourceFileNames,
+            IEnumerable<string> outputFileNames)
+        {
+            _replacePhrases = replacements;
+
+            if (AreSourceFileTypesValid(sourceFileNames) == false)
+            {
+                throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+            }
+
+            if (AreOutputFileTypesValid(outputFileNames) == false)
             {
                 throw new InvalidFileTypeException("Invalid output file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
             }
@@ -112,7 +150,60 @@ namespace TextReplaceAPI
             // generate the matcher
             if (preGenerateMatcher)
             {
-                GenerateAhoCorasickMatcher(ReplacePhrases, caseSensitive);
+                GenerateAhoCorasickMatcher(caseSensitive);
+            }
+        }
+
+        /// <summary>
+        /// Initializes a Dictionary<string, string> of replace phrases, an IEnumberable<SourceFile>
+        /// containing the source and output file names, and the Aho-Corasick matcher if the
+        /// preGenerateMatcher argument is true.
+        /// 
+        /// Only use this contructor if you would like to pre-generate the Aho-Corasick matcher.
+        /// This front-loads much of the processing time upon instantiation of this class's object
+        /// rather than when the PerformReplacements method is called.
+        /// </summary>
+        /// <param name="replacements"></param>
+        /// <param name="sourceFileNames"></param>
+        /// <param name="outputFileNames"></param>
+        /// <param name="preGenerateMatcher"></param>
+        /// <param name="caseSensitive"></param>
+        /// <exception cref="InvalidFileTypeException">
+        /// A file type is not supported. See documentation for a list of supported file types.
+        /// </exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="PathTooLongException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public Replacify(
+            Dictionary<string, string> replacements,
+            IEnumerable<string> sourceFileNames,
+            IEnumerable<string> outputFileNames,
+            bool preGenerateMatcher,
+            bool caseSensitive)
+        {
+            _replacePhrases = replacements;
+
+            if (AreSourceFileTypesValid(sourceFileNames) == false)
+            {
+                throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+            }
+
+            if (AreOutputFileTypesValid(sourceFileNames) == false)
+            {
+                throw new InvalidFileTypeException("Invalid output file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+            }
+
+            // zip the source file names and the output file names together and then combine the names into SourceFile objects
+            _sourceFiles = ZipSourceFiles(sourceFileNames, outputFileNames);
+
+            // generate the matcher
+            if (preGenerateMatcher)
+            {
+                GenerateAhoCorasickMatcher(caseSensitive);
             }
         }
 
@@ -125,6 +216,8 @@ namespace TextReplaceAPI
         /// the method will prevent the exception from bubbling up to the caller and continue
         /// to write to the other files in the list.
         /// </summary>
+        /// <param name="replacements"></param>
+        /// <param name="sourceFiles"></param>
         /// <param name="wholeWord"></param>
         /// <param name="caseSensitive"></param>
         /// <param name="preserveCase"></param>
@@ -143,7 +236,7 @@ namespace TextReplaceAPI
         /// The XML data within a .docx or .xlsx file has an incorrect structure and could not be parsed.
         /// </exception>
         public static bool PerformReplacements(
-            Dictionary<string, string> replacePhrases,
+            Dictionary<string, string> replacements,
             IEnumerable<SourceFile> sourceFiles,
             bool wholeWord,
             bool caseSensitive,
@@ -156,7 +249,7 @@ namespace TextReplaceAPI
             // the remaining files. It will only allow an ArgumentException to bubble up to the caller if SourceFiles is empty.
             // This returns false if something went wrong, and true if all files wrote successfully.
             return OutputHelper.PerformReplacements(
-                replacePhrases, sourceFiles, wholeWord, caseSensitive, preserveCase, throwExceptions, styling);
+                replacements, sourceFiles, wholeWord, caseSensitive, preserveCase, throwExceptions, styling);
         }
 
         /// <summary>
@@ -229,7 +322,7 @@ namespace TextReplaceAPI
         {
             if (FileValidation.IsReplaceFileTypeValid(fileName) == false)
             {
-                throw new InvalidFileTypeException($"File type {Path.GetExtension(fileName).ToLower()} is not supported as a replacements file.");
+                throw new InvalidFileTypeException($"File type \"{Path.GetExtension(fileName).ToLower()}\" is not supported as a replacements file.");
             }
 
             return ReplacementsHelper.ParseReplacements(fileName);
@@ -246,7 +339,7 @@ namespace TextReplaceAPI
         /// output file names, and -1 for the number of replacements made.
         /// </returns>
         /// <exception cref="ArgumentException">The number of source files does not equal the number of output files.</exception>
-        public static IEnumerable<SourceFile> ZipSourceFiles(IEnumerable<string> sourceFileNames, IEnumerable<string> outputFileNames)
+        public static List<SourceFile> ZipSourceFiles(IEnumerable<string> sourceFileNames, IEnumerable<string> outputFileNames)
         {
             if (sourceFileNames.Count() != outputFileNames.Count())
             {
@@ -256,7 +349,8 @@ namespace TextReplaceAPI
             // zip the source file names and the output file names together and then combine the names into SourceFile objects
             return sourceFileNames
                 .Zip(outputFileNames, (s, o) => new { SourceFileName = s, OutputFIleName = o })
-                .Select(x => new SourceFile(x.SourceFileName, x.OutputFIleName, -1));
+                .Select(x => new SourceFile(x.SourceFileName, x.OutputFIleName, -1))
+                .ToList();
         }
 
         /// <summary>
@@ -329,10 +423,16 @@ namespace TextReplaceAPI
         /// Generates the Aho-Corasick matcher, which front-loads much of the processing time
         /// rather than performing this operation when the PerformReplacements method is called.
         /// </summary>
-        /// <param name="replacePhrases"></param>
+        /// <param name="replacements"></param>
         /// <param name="caseSensitive"></param>
-        public void GenerateAhoCorasickMatcher(Dictionary<string, string> replacePhrases, bool caseSensitive)
+        /// <exception cref="InvalidOperationException"></exception>
+        public void GenerateAhoCorasickMatcher(bool caseSensitive)
         {
+            if (ReplacePhrases.Count == 0)
+            {
+                throw new InvalidOperationException("The replacements are empty. Matcher not generated.");
+            }
+
             _matcher = AhoCorasickMatcher.CreateMatcher(ReplacePhrases, caseSensitive);
         }
 
@@ -343,6 +443,11 @@ namespace TextReplaceAPI
         public void ClearAhoCorasickMatcher()
         {
             _matcher = null;
+        }
+
+        public bool IsMatcherCreated()
+        {
+            return _matcher != null;
         }
     }
 }

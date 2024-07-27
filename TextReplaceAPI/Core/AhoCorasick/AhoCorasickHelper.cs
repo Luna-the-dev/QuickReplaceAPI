@@ -1,7 +1,7 @@
 ﻿using DocumentFormat.OpenXml;
 using Wordprocessing = DocumentFormat.OpenXml.Wordprocessing;
 using Spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
-using TextReplaceAPI.Data;
+using TextReplaceAPI.DataTypes;
 
 namespace TextReplaceAPI.Core.AhoCorasick
 {

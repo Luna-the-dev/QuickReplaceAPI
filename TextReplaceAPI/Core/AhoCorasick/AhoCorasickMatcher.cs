@@ -1,4 +1,4 @@
-﻿using TextReplaceAPI.Data;
+﻿using TextReplaceAPI.DataTypes;
 
 namespace TextReplaceAPI.Core.AhoCorasick
 {

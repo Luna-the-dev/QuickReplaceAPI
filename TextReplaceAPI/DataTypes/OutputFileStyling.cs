@@ -2,9 +2,9 @@
 using Spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
 using Wordprocessing = DocumentFormat.OpenXml.Wordprocessing;
 
-namespace TextReplaceAPI.Data
+namespace TextReplaceAPI.DataTypes
 {
-    public class OutputFileStyling
+    public partial class OutputFileStyling
     {
         public bool Bold { get; set; }
 
@@ -32,34 +32,20 @@ namespace TextReplaceAPI.Data
             set { _textColor = FormatColorString(value); }
         }
 
-        public OutputFileStyling()
-        {
-            Bold = false;
-            Italics = false;
-            Underline = false;
-            Strikethrough = false;
-            IsHighlighted = false;
-            IsTextColored = false;
-            _highlightColor = FormatColorString("");
-            _textColor = FormatColorString("");
-        }
-
         public OutputFileStyling(
-            bool bold,
-            bool italics,
-            bool underline,
-            bool strikethrough,
-            bool isHighlighted,
-            bool isTextColored,
-            string highlightColor,
-            string textColor)
+            bool bold = false,
+            bool italics = false,
+            bool underline = false,
+            bool strikethrough = false,
+            string highlightColor = "",
+            string textColor = "")
         {
             Bold = bold;
             Italics = italics;
             Underline = underline;
             Strikethrough = strikethrough;
-            IsHighlighted = isHighlighted;
-            IsTextColored = isTextColored;
+            IsHighlighted = (highlightColor != string.Empty);
+            IsTextColored = (textColor != string.Empty);
             _highlightColor = FormatColorString(highlightColor);
             _textColor = FormatColorString(textColor);
         }
@@ -166,7 +152,7 @@ namespace TextReplaceAPI.Data
             }
 
             // check if the string starts off with a pound (optional) and contains 6 hex digits
-            if (Regex.Match(color, "^#?[a-fA-F0-9]{6}$").Success == false)
+            if (HexStringRegex().Match(color).Success == false)
             {
                 return "000000";
             }
@@ -178,5 +164,8 @@ namespace TextReplaceAPI.Data
 
             return color.ToUpper();
         }
+
+        [GeneratedRegex("^#?[a-fA-F0-9]{6}$")]
+        private static partial Regex HexStringRegex();
     }
 }
