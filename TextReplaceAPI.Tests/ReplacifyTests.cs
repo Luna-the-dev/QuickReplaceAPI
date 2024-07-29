@@ -1,20 +1,18 @@
-using System.Diagnostics;
-using TextReplaceAPI;
 using TextReplaceAPI.DataTypes;
 using TextReplaceAPI.Exceptions;
 using TextReplaceAPI.Tests.Common;
 
 namespace TextReplaceAPI.Tests
 {
-    public class ReplacifyTests
+    public class QuickReplaceTests
     {
         private static readonly string RelativeReplacementsPath = "../../../MockFiles/Replacements/";
         private static readonly string RelativeSourcesPath = "../../../MockFiles/Sources/";
         private static readonly string RelativeMockOutputsPath = "../../../MockFiles/Outputs/";
-        private static readonly string RelativeGeneratedFilePath = "../../GeneratedTestFiles/ReplacifyTests/";
+        private static readonly string RelativeGeneratedFilePath = "../../GeneratedTestFiles/QuickReplaceTests/";
 
         [Fact]
-        public void Replacify_ConstructorReplacementsFromDict_ReplacePhrasesAndSourceFilesInitialized()
+        public void QuickReplace_ConstructorReplacementsFromDict_ReplacePhrasesAndSourceFilesInitialized()
         {
             // Arrange
             var replacePhrases = new Dictionary<string, string>
@@ -45,17 +43,17 @@ namespace TextReplaceAPI.Tests
             };
 
             // Act
-            var replacify = new Replacify(replacePhrases, sourceFileNames, outputFileNames);
+            var QuickReplace = new QuickReplace(replacePhrases, sourceFileNames, outputFileNames);
 
             // Assert
-            Assert.Equal(replacePhrases, replacify.ReplacePhrases);
+            Assert.Equal(replacePhrases, QuickReplace.ReplacePhrases);
 
-            Assert.Equal(5, replacify.SourceFiles.Count);
+            Assert.Equal(5, QuickReplace.SourceFiles.Count);
             for (int i = 0; i < sourceFileNames.Count; i++)
             {
-                Assert.Equal(sourceFileNames[i], replacify.SourceFiles[i].SourceFileName);
-                Assert.Equal(outputFileNames[i], replacify.SourceFiles[i].OutputFileName);
-                Assert.Equal(-1, replacify.SourceFiles[i].NumOfReplacements);
+                Assert.Equal(sourceFileNames[i], QuickReplace.SourceFiles[i].SourceFileName);
+                Assert.Equal(outputFileNames[i], QuickReplace.SourceFiles[i].OutputFileName);
+                Assert.Equal(-1, QuickReplace.SourceFiles[i].NumOfReplacements);
             }
         }
 
@@ -65,7 +63,7 @@ namespace TextReplaceAPI.Tests
         [InlineData("replacements-abbreviations.xlsx")]
         [InlineData("replacements-abbreviations-pound-delimiter.txt")]
         [InlineData("replacements-abbreviations-semicolon-delimiter.txt")]
-        public void Replacify_ConstructorReplacementsFromFileName_ReplacePhrasesAndSourceFilesInitialized(string replacementsFileName)
+        public void QuickReplace_ConstructorReplacementsFromFileName_ReplacePhrasesAndSourceFilesInitialized(string replacementsFileName)
         {
             // Arrange
             replacementsFileName = RelativeReplacementsPath + replacementsFileName;
@@ -92,21 +90,21 @@ namespace TextReplaceAPI.Tests
             var expected = "abv-mntnd";
 
             // Act
-            var replacify = new Replacify(replacementsFileName, sourceFileNames, outputFileNames);
+            var QuickReplace = new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames);
 
             // Assert
-            Assert.Equal(expected, replacify.ReplacePhrases[key]);
+            Assert.Equal(expected, QuickReplace.ReplacePhrases[key]);
 
             for (int i = 0; i < sourceFileNames.Count; i++)
             {
-                Assert.Equal(sourceFileNames[i], replacify.SourceFiles[i].SourceFileName);
-                Assert.Equal(outputFileNames[i], replacify.SourceFiles[i].OutputFileName);
-                Assert.Equal(-1, replacify.SourceFiles[i].NumOfReplacements);
+                Assert.Equal(sourceFileNames[i], QuickReplace.SourceFiles[i].SourceFileName);
+                Assert.Equal(outputFileNames[i], QuickReplace.SourceFiles[i].OutputFileName);
+                Assert.Equal(-1, QuickReplace.SourceFiles[i].NumOfReplacements);
             }
         }
 
         [Fact]
-        public void Replacify_ConstructorGenerateMatcher_AhoCorasickMatcherInitialized()
+        public void QuickReplace_ConstructorGenerateMatcher_AhoCorasickMatcherInitialized()
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -115,17 +113,17 @@ namespace TextReplaceAPI.Tests
             var outputFileNames = new List<string>() { "output-file-name.txt" };
 
             // Act
-            var replacify = new Replacify(replacementsFileName, sourceFileNames, outputFileNames, preGenerateMatcher: true, caseSensitive: true);
+            var QuickReplace = new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames, preGenerateMatcher: true, caseSensitive: true);
 
             // Assert
-            Assert.True(replacify.IsMatcherCreated());
+            Assert.True(QuickReplace.IsMatcherCreated());
         }
 
         [Theory]
         [InlineData("invalid-filetype.tmp", "source-resume.txt", "output-resume.txt")]
         [InlineData("replacements-abbreviations.csv", "invalid-filetype.tmp", "source-resume.txt")]
         [InlineData("replacements-abbreviations.csv", "source-resume.txt", "invalid-filetype.tmp")]
-        public void Replacify_InvalidFileType_ThrowsInvalidFileTypeException(string replacementsFileName, string sourceFileName, string outputFileName)
+        public void QuickReplace_InvalidFileType_ThrowsInvalidFileTypeException(string replacementsFileName, string sourceFileName, string outputFileName)
         {
             // Arrange
             replacementsFileName = RelativeReplacementsPath + replacementsFileName;
@@ -134,11 +132,11 @@ namespace TextReplaceAPI.Tests
             var outputFileNames = new List<string>() { outputFileName };
 
             // Act and Assert
-            Assert.Throws<InvalidFileTypeException>(() => new Replacify(replacementsFileName, sourceFileNames, outputFileNames));
+            Assert.Throws<InvalidFileTypeException>(() => new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames));
         }
 
         [Fact]
-        public void Replacify_EmptyReplacements_ThrowsInvalidOperationException()
+        public void QuickReplace_EmptyReplacements_ThrowsInvalidOperationException()
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-empty.csv";
@@ -147,11 +145,11 @@ namespace TextReplaceAPI.Tests
             var outputFileNames = new List<string>() { "output-file-name.txt" };
 
             // Act and Assert
-            Assert.Throws<InvalidOperationException>(() => new Replacify(replacementsFileName, sourceFileNames, outputFileNames));
+            Assert.Throws<InvalidOperationException>(() => new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames));
         }
 
         [Fact]
-        public void Replacify_EmptyReplacePhraseItem1_ThrowsInvalidOperationException()
+        public void QuickReplace_EmptyReplacePhraseItem1_ThrowsInvalidOperationException()
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-empty-item1.csv";
@@ -160,11 +158,11 @@ namespace TextReplaceAPI.Tests
             var outputFileNames = new List<string>() { "output-file-name.txt" };
 
             // Act and Assert
-            Assert.Throws<InvalidOperationException>(() => new Replacify(replacementsFileName, sourceFileNames, outputFileNames));
+            Assert.Throws<InvalidOperationException>(() => new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames));
         }
 
         [Fact]
-        public void Replacify_DifferentSourceAndOutputFileLengths_ThrowsArgumentException()
+        public void QuickReplace_DifferentSourceAndOutputFileLengths_ThrowsArgumentException()
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -174,7 +172,7 @@ namespace TextReplaceAPI.Tests
             var outputFileNames = new List<string>() { "output-file-name.txt" };
 
             // Act and Assert
-            Assert.Throws<ArgumentException>(() => new Replacify(replacementsFileName, sourceFileNames, outputFileNames));
+            Assert.Throws<ArgumentException>(() => new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames));
         }
 
         [Theory]
@@ -196,15 +194,15 @@ namespace TextReplaceAPI.Tests
             var outputFileNames = new List<string>() { generatedFileName };
 
             // Act
-            var replacify = new Replacify(replacementsFileName, sourceFileNames, outputFileNames);
-            var actual = replacify.PerformReplacements(wholeWord: false, caseSensitive: false, preserveCase: false);
+            var QuickReplace = new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames);
+            var actual = QuickReplace.PerformReplacements(wholeWord: false, caseSensitive: false, preserveCase: false);
 
             // Assert
             Assert.True(actual);
 
             // Compare the generated file to the mock file
-            if (Path.GetExtension(replacify.SourceFiles.First().OutputFileName) == ".xlsx" ||
-                Path.GetExtension(replacify.SourceFiles.First().OutputFileName) == ".docx")
+            if (Path.GetExtension(QuickReplace.SourceFiles.First().OutputFileName) == ".xlsx" ||
+                Path.GetExtension(QuickReplace.SourceFiles.First().OutputFileName) == ".docx")
             {
                 Assert.True(FileComparer.FilesAreEqual_OpenXml(mockOutputName, generatedFileName));
             }
@@ -235,17 +233,17 @@ namespace TextReplaceAPI.Tests
             var outputFileNames = new List<string>() { generatedFileName };
 
             // Act
-            var replacify = new Replacify(replacementsFileName, sourceFileNames, outputFileNames, preGenerateMatcher: true, caseSensitive: false);
-            var matcherActual = replacify.IsMatcherCreated();
-            var actual = replacify.PerformReplacements(wholeWord: false, caseSensitive: false, preserveCase: false);
+            var QuickReplace = new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames, preGenerateMatcher: true, caseSensitive: false);
+            var matcherActual = QuickReplace.IsMatcherCreated();
+            var actual = QuickReplace.PerformReplacements(wholeWord: false, caseSensitive: false, preserveCase: false);
 
             // Assert
             Assert.True(matcherActual);
             Assert.True(actual);
 
             // Compare the generated file to the mock file
-            if (Path.GetExtension(replacify.SourceFiles.First().OutputFileName) == ".xlsx" ||
-                Path.GetExtension(replacify.SourceFiles.First().OutputFileName) == ".docx")
+            if (Path.GetExtension(QuickReplace.SourceFiles.First().OutputFileName) == ".xlsx" ||
+                Path.GetExtension(QuickReplace.SourceFiles.First().OutputFileName) == ".docx")
             {
                 Assert.True(FileComparer.FilesAreEqual_OpenXml(mockOutputName, generatedFileName));
             }
@@ -275,11 +273,11 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false);
 
             // Assert
             Assert.True(actual);
@@ -306,7 +304,7 @@ namespace TextReplaceAPI.Tests
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
             var generatedFileName = RelativeGeneratedFilePath + "output-resume.txt";
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
             var emptySourceFiles = new List<SourceFile>();
 
             if (File.Exists(generatedFileName))
@@ -316,9 +314,9 @@ namespace TextReplaceAPI.Tests
 
             // Act and Assert
             Assert.Throws<ArgumentException>(() =>
-                Replacify.PerformReplacements(replacePhrases, emptySourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: false));
+                QuickReplace.PerformReplacements(replacePhrases, emptySourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: false));
             Assert.Throws<ArgumentException>(() =>
-                Replacify.PerformReplacements(replacePhrases, emptySourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: true));
+                QuickReplace.PerformReplacements(replacePhrases, emptySourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: true));
 
             Assert.False(File.Exists(generatedFileName));
         }
@@ -340,8 +338,8 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             if (File.Exists(generatedFileName) == false)
             {
@@ -352,7 +350,7 @@ namespace TextReplaceAPI.Tests
             using var writer = new StreamWriter(generatedFileName);
 
             // Act and Assert
-            Assert.Throws<IOException>(() => Replacify.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false));
+            Assert.Throws<IOException>(() => QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false));
         }
 
         [Theory]
@@ -371,12 +369,12 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act and Assert
             Assert.Throws<NotSupportedException>(() =>
-                Replacify.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false));
+                QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false));
         }
 
         [Theory]
@@ -394,8 +392,8 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
             
             if (File.Exists(generatedFileName))
             {
@@ -403,7 +401,7 @@ namespace TextReplaceAPI.Tests
             }
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: false);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: false);
 
             // Assert
             Assert.False(actual);
@@ -437,8 +435,8 @@ namespace TextReplaceAPI.Tests
                 RelativeGeneratedFilePath + "output-financial-sample.xlsx",
             };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             if (File.Exists(RelativeGeneratedFilePath + "this-file-doesnt-exist.txt"))
             {
@@ -446,7 +444,7 @@ namespace TextReplaceAPI.Tests
             }
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: false);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: false);
 
             // Assert
             Assert.False(actual);
@@ -503,11 +501,11 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, wholeWord: true, caseSensitive: false, preserveCase: false);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: true, caseSensitive: false, preserveCase: false);
 
             // Assert
             Assert.True(actual);
@@ -544,11 +542,11 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: true, preserveCase: false);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: true, preserveCase: false);
 
             // Assert
             Assert.True(actual);
@@ -585,11 +583,11 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: true);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: true);
 
             // Assert
             Assert.True(actual);
@@ -626,11 +624,11 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, wholeWord: true, caseSensitive: true, preserveCase: true);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: true, caseSensitive: true, preserveCase: true);
 
             // Assert
             Assert.True(actual);
@@ -664,13 +662,13 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             var styling = new OutputFileStyling(bold: true);
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -704,13 +702,13 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             var styling = new OutputFileStyling(italics: true);
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -744,13 +742,13 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             var styling = new OutputFileStyling(underline: true);
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -784,13 +782,13 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             var styling = new OutputFileStyling(strikethrough: true);
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -824,13 +822,13 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             var styling = new OutputFileStyling(highlightColor: "#FF0000");
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -864,13 +862,13 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             var styling = new OutputFileStyling(textColor: "#0000FF");
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -904,13 +902,13 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             var styling = new OutputFileStyling(true, true, true, true, "#FF0000", "#0000FF");
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -944,11 +942,11 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false);
 
             // Assert
             Assert.True(actual);
@@ -979,11 +977,11 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false);
 
             // Assert
             Assert.True(actual);
@@ -1015,11 +1013,11 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false);
 
             // Assert
             Assert.True(actual);
@@ -1041,13 +1039,13 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             var styling = new OutputFileStyling(true, true, true, true, "#FF0000", "#0000FF");
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling);
 
             // Assert
             Assert.True(actual);
@@ -1069,13 +1067,13 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             var styling = new OutputFileStyling(true, true, true, true, "#FF0000", "#0000FF");
 
             // Act
-            var actual = Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling);
+            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling);
 
             // Assert
             Assert.True(actual);
@@ -1098,11 +1096,11 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act and Assert
-            Assert.Throws<NotSupportedException>(() => Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false));
+            Assert.Throws<NotSupportedException>(() => QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false));
         }
 
         [Theory]
@@ -1118,11 +1116,11 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>() { sourceFileName };
             var outputFileNames = new List<string>() { generatedFileName };
 
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act and Assert
-            Assert.Throws<NotSupportedException>(() => Replacify.PerformReplacements(replacePhrases, sourceFiles, false, false, false));
+            Assert.Throws<NotSupportedException>(() => QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false));
         }
 
         [Theory]
@@ -1137,7 +1135,7 @@ namespace TextReplaceAPI.Tests
             replacementsFileName = RelativeReplacementsPath + replacementsFileName;
 
             // Act
-            var replacePhrases = Replacify.ParseReplacements(replacementsFileName);
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
 
             // Assert
             Assert.Equal("abv-mntnd", replacePhrases["Above-mentioned"]);
@@ -1152,7 +1150,7 @@ namespace TextReplaceAPI.Tests
             var replacementsFileName = RelativeReplacementsPath + "invalid-file-type.tmp";
 
             // Act and Assert
-            Assert.Throws<InvalidFileTypeException>(() => Replacify.ParseReplacements(replacementsFileName));
+            Assert.Throws<InvalidFileTypeException>(() => QuickReplace.ParseReplacements(replacementsFileName));
         }
 
         [Fact]
@@ -1162,7 +1160,7 @@ namespace TextReplaceAPI.Tests
             var replacementsFileName = RelativeReplacementsPath + "file-doesnt-exist.txt";
 
             // Act and Assert
-            Assert.Throws<FileNotFoundException>(() => Replacify.ParseReplacements(replacementsFileName));
+            Assert.Throws<FileNotFoundException>(() => QuickReplace.ParseReplacements(replacementsFileName));
         }
 
         [Fact]
@@ -1172,7 +1170,7 @@ namespace TextReplaceAPI.Tests
             var replacementsFileName = RelativeReplacementsPath + "replacements-empty.csv";
 
             // Act and Assert
-            Assert.Throws<InvalidOperationException>(() => Replacify.ParseReplacements(replacementsFileName));
+            Assert.Throws<InvalidOperationException>(() => QuickReplace.ParseReplacements(replacementsFileName));
         }
 
         [Fact]
@@ -1182,7 +1180,7 @@ namespace TextReplaceAPI.Tests
             var replacementsFileName = RelativeReplacementsPath + "replacements-empty-item1.csv";
 
             // Act and Assert
-            Assert.Throws<InvalidOperationException>(() => Replacify.ParseReplacements(replacementsFileName));
+            Assert.Throws<InvalidOperationException>(() => QuickReplace.ParseReplacements(replacementsFileName));
         }
 
         [Fact]
@@ -1208,7 +1206,7 @@ namespace TextReplaceAPI.Tests
             };
 
             // Act
-            var sourceFiles = Replacify.ZipSourceFiles(sourceFileNames, outputFileNames);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Assert
             Assert.Equal(5, sourceFiles.Count);
@@ -1228,7 +1226,7 @@ namespace TextReplaceAPI.Tests
             var outputFileNames = new List<string>() { "output-file-name.txt" };
 
             // Act and Assert
-            Assert.Throws<ArgumentException>(() => Replacify.ZipSourceFiles(sourceFileNames, outputFileNames));
+            Assert.Throws<ArgumentException>(() => QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames));
         }
 
         [Theory]
@@ -1239,7 +1237,7 @@ namespace TextReplaceAPI.Tests
         public void IsReplacementFileTypeValid_ValidFileType_ReturnsTrue(string filename)
         {
             // Act
-            var actual = Replacify.IsReplacementFileTypeValid(filename);
+            var actual = QuickReplace.IsReplacementFileTypeValid(filename);
 
             // Assert
             Assert.True(actual);
@@ -1251,7 +1249,7 @@ namespace TextReplaceAPI.Tests
         public void IsReplacementFileTypeValid_InvalidFileType_ReturnsFalse(string filename)
         {
             // Act
-            var actual = Replacify.IsReplacementFileTypeValid(filename);
+            var actual = QuickReplace.IsReplacementFileTypeValid(filename);
 
             // Assert
             Assert.False(actual);
@@ -1270,7 +1268,7 @@ namespace TextReplaceAPI.Tests
             };
 
             // Act
-            var actual = Replacify.AreSourceFileTypesValid(sourceFileNames);
+            var actual = QuickReplace.AreSourceFileTypesValid(sourceFileNames);
 
             // Assert
             Assert.True(actual);
@@ -1290,7 +1288,7 @@ namespace TextReplaceAPI.Tests
             };
 
             // Act
-            var actual = Replacify.AreSourceFileTypesValid(sourceFileNames);
+            var actual = QuickReplace.AreSourceFileTypesValid(sourceFileNames);
 
             // Assert
             Assert.False(actual);
@@ -1305,7 +1303,7 @@ namespace TextReplaceAPI.Tests
         public void IsSourceFileTypeValid_ValidFileType_ReturnsTrue(string filename)
         {
             // Act
-            var actual = Replacify.IsSourceFileTypeValid(filename);
+            var actual = QuickReplace.IsSourceFileTypeValid(filename);
 
             // Assert
             Assert.True(actual);
@@ -1318,7 +1316,7 @@ namespace TextReplaceAPI.Tests
             var filename = "invalid-file-type.tmp";
 
             // Act
-            var actual = Replacify.IsSourceFileTypeValid(filename);
+            var actual = QuickReplace.IsSourceFileTypeValid(filename);
 
             // Assert
             Assert.False(actual);
@@ -1337,7 +1335,7 @@ namespace TextReplaceAPI.Tests
             };
 
             // Act
-            var actual = Replacify.AreOutputFileTypesValid(outputFileNames);
+            var actual = QuickReplace.AreOutputFileTypesValid(outputFileNames);
 
             // Assert
             Assert.True(actual);
@@ -1357,7 +1355,7 @@ namespace TextReplaceAPI.Tests
             };
 
             // Act
-            var actual = Replacify.AreOutputFileTypesValid(outputFileNames);
+            var actual = QuickReplace.AreOutputFileTypesValid(outputFileNames);
 
             // Assert
             Assert.False(actual);
@@ -1372,7 +1370,7 @@ namespace TextReplaceAPI.Tests
         public void IsOutputFileTypeValid_ValidFileType_ReturnsTrue(string filename)
         {
             // Act
-            var actual = Replacify.IsOutputFileTypeValid(filename);
+            var actual = QuickReplace.IsOutputFileTypeValid(filename);
 
             // Assert
             Assert.True(actual);
@@ -1385,7 +1383,7 @@ namespace TextReplaceAPI.Tests
             var filename = "invalid-file-type.tmp";
 
             // Act
-            var actual = Replacify.IsOutputFileTypeValid(filename);
+            var actual = QuickReplace.IsOutputFileTypeValid(filename);
 
             // Assert
             Assert.False(actual);
@@ -1407,12 +1405,12 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>();
             var outputFileNames = new List<string>();
 
-            var replacify = new Replacify(replacePhrases, sourceFileNames, outputFileNames);
-            var expectedBeforeAct = replacify.IsMatcherCreated();
+            var QuickReplace = new QuickReplace(replacePhrases, sourceFileNames, outputFileNames);
+            var expectedBeforeAct = QuickReplace.IsMatcherCreated();
 
             // Act
-            replacify.GenerateAhoCorasickMatcher(true);
-            var expectedAfterAct = replacify.IsMatcherCreated();
+            QuickReplace.GenerateAhoCorasickMatcher(true);
+            var expectedAfterAct = QuickReplace.IsMatcherCreated();
 
             // Assert
             Assert.False(expectedBeforeAct);
@@ -1428,10 +1426,10 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>();
             var outputFileNames = new List<string>();
 
-            var replacify = new Replacify(replacePhrases, sourceFileNames, outputFileNames);
+            var QuickReplace = new QuickReplace(replacePhrases, sourceFileNames, outputFileNames);
 
             // Act and Assert
-            Assert.Throws<InvalidOperationException>(() => replacify.GenerateAhoCorasickMatcher(true));
+            Assert.Throws<InvalidOperationException>(() => QuickReplace.GenerateAhoCorasickMatcher(true));
         }
         
         [Fact]
@@ -1450,15 +1448,15 @@ namespace TextReplaceAPI.Tests
             var sourceFileNames = new List<string>();
             var outputFileNames = new List<string>();
 
-            var replacify = new Replacify(replacePhrases, sourceFileNames, outputFileNames);
-            var expected1 = replacify.IsMatcherCreated();
+            var QuickReplace = new QuickReplace(replacePhrases, sourceFileNames, outputFileNames);
+            var expected1 = QuickReplace.IsMatcherCreated();
 
-            replacify.GenerateAhoCorasickMatcher(true);
-            var expected2 = replacify.IsMatcherCreated();
+            QuickReplace.GenerateAhoCorasickMatcher(true);
+            var expected2 = QuickReplace.IsMatcherCreated();
 
             // Act
-            replacify.ClearAhoCorasickMatcher();
-            var expected3 = replacify.IsMatcherCreated();
+            QuickReplace.ClearAhoCorasickMatcher();
+            var expected3 = QuickReplace.IsMatcherCreated();
 
             // Assert
             Assert.False(expected1);

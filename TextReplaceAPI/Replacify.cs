@@ -6,7 +6,7 @@ using TextReplaceAPI.Exceptions;
 
 namespace TextReplaceAPI
 {
-    public class Replacify
+    public class QuickReplace
     {
         // key is the phrase to replace, value is what it is being replaced with
         private Dictionary<string, string> _replacePhrases = [];
@@ -42,7 +42,7 @@ namespace TextReplaceAPI
         /// <exception cref="IOException"></exception>
         /// <exception cref="UnauthorizedAccessException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public Replacify(
+        public QuickReplace(
             string replacementsFileName,
             IEnumerable<string> sourceFileNames,
             IEnumerable<string> outputFileNames)
@@ -80,7 +80,7 @@ namespace TextReplaceAPI
         /// <exception cref="IOException"></exception>
         /// <exception cref="UnauthorizedAccessException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public Replacify(
+        public QuickReplace(
             Dictionary<string, string> replacements,
             IEnumerable<string> sourceFileNames,
             IEnumerable<string> outputFileNames)
@@ -125,7 +125,7 @@ namespace TextReplaceAPI
         /// <exception cref="IOException"></exception>
         /// <exception cref="UnauthorizedAccessException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public Replacify(
+        public QuickReplace(
             string replacementsFileName,
             IEnumerable<string> sourceFileNames,
             IEnumerable<string> outputFileNames,
@@ -178,7 +178,7 @@ namespace TextReplaceAPI
         /// <exception cref="IOException"></exception>
         /// <exception cref="UnauthorizedAccessException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public Replacify(
+        public QuickReplace(
             Dictionary<string, string> replacements,
             IEnumerable<string> sourceFileNames,
             IEnumerable<string> outputFileNames,
