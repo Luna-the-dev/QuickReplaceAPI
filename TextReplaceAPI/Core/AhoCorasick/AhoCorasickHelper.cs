@@ -2,6 +2,7 @@
 using Wordprocessing = DocumentFormat.OpenXml.Wordprocessing;
 using Spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
 using TextReplaceAPI.DataTypes;
+using System.Diagnostics;
 
 namespace TextReplaceAPI.Core.AhoCorasick
 {
@@ -99,7 +100,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
             var runs = paragraph.Descendants<Wordprocessing.Run>().ToList();
             var runPtrs = new List<int>();
 
-            // if there are no runs in the paragraph, return an empty List
+            // if there are no runs in the paragraph, turn the text into a run
             if (runs.Count == 0)
             {
                 runs.Add(new Wordprocessing.Run(new Wordprocessing.Text(paragraph.InnerText)));
@@ -253,7 +254,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
             var runs = paragraph.Descendants<Wordprocessing.Run>().ToList();
             var runPtrs = new List<int>();
 
-            // if there are no runs in the paragraph, return an empty List
+            // if there are no runs in the paragraph, turn the text into a run
             if (runs.Count == 0)
             {
                 runs.Add(new Wordprocessing.Run(new Wordprocessing.Text(paragraph.InnerText)));
@@ -656,7 +657,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
             var runs = sharedStringItem.Descendants<Spreadsheet.Run>().ToList();
             var runPtrs = new List<int>();
 
-            // if there are no runs in the paragraph, return an empty List
+            // if there are no runs in the paragraph, turn the text into a run
             if (runs.Count == 0)
             {
                 runs.Add(new Spreadsheet.Run(new Spreadsheet.Text(sharedStringItem.InnerText)));

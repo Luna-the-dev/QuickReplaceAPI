@@ -6,7 +6,6 @@ using TextReplaceAPI.Core.AhoCorasick;
 using TextReplaceAPI.Core.Validation;
 using TextReplaceAPI.DataTypes;
 using TextReplaceAPI.Exceptions;
-using System.Diagnostics;
 
 namespace TextReplaceAPI.Core.Helpers
 {
@@ -121,7 +120,6 @@ namespace TextReplaceAPI.Core.Helpers
                 // do the search on each file
                 foreach (var file in sourceFiles)
                 {
-                    Debug.WriteLine(20);
                     file.NumOfReplacements = WriteReplacementsToFile(
                         replacePhrases, file.SourceFileName, file.OutputFileName, matcher, wholeWord, preserveCase, styling);
                 }
@@ -445,7 +443,8 @@ namespace TextReplaceAPI.Core.Helpers
                 // add the new runs into the paragraph
                 foreach (var run in newRuns)
                 {
-                    paragraph.AppendChild(run);
+                    var cloneRun = run.CloneNode(true);
+                    paragraph.AppendChild(cloneRun);
                 }
             }
             document.MainDocumentPart.Document.Save();
@@ -628,7 +627,8 @@ namespace TextReplaceAPI.Core.Helpers
 
             foreach (var run in runs)
             {
-                sharedStringItem.Append(run);
+                var cloneRun = run.CloneNode(true);
+                sharedStringItem.Append(cloneRun);
             }
 
             return sharedStringItem;
