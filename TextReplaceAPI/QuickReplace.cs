@@ -108,7 +108,7 @@ namespace TextReplaceAPI
         /// 
         /// Only use this contructor if you would like to pre-generate the Aho-Corasick matcher.
         /// This front-loads much of the processing time upon instantiation of this class's object
-        /// rather than when the PerformReplacements method is called.
+        /// rather than when the Replace method is called.
         /// </summary>
         /// <param name="replacementsFileName"></param>
         /// <param name="sourceFileNames"></param>
@@ -161,7 +161,7 @@ namespace TextReplaceAPI
         /// 
         /// Only use this contructor if you would like to pre-generate the Aho-Corasick matcher.
         /// This front-loads much of the processing time upon instantiation of this class's object
-        /// rather than when the PerformReplacements method is called.
+        /// rather than when the Replace method is called.
         /// </summary>
         /// <param name="replacements"></param>
         /// <param name="sourceFileNames"></param>
@@ -235,7 +235,7 @@ namespace TextReplaceAPI
         /// <exception cref="InvalidXmlStructureException">
         /// The XML data within a .docx or .xlsx file has an incorrect structure and could not be parsed.
         /// </exception>
-        public static bool PerformReplacements(
+        public static bool Replace(
             Dictionary<string, string> replacements,
             IEnumerable<SourceFile> sourceFiles,
             bool wholeWord,
@@ -244,11 +244,11 @@ namespace TextReplaceAPI
             OutputFileStyling? styling = null,
             bool throwExceptions = true)
         {
-            // If throwExceptions is true, PerformReplacements() will allow exceptions to bubble up to the caller.
-            // If it is false, PerformReplacements() will catch any exceptions and continues to write to
+            // If throwExceptions is true, Replace() will allow exceptions to bubble up to the caller.
+            // If it is false, Replace() will catch any exceptions and continues to write to
             // the remaining files. It will only allow an ArgumentException to bubble up to the caller if SourceFiles is empty.
             // This returns false if something went wrong, and true if all files wrote successfully.
-            return OutputHelper.PerformReplacements(
+            return OutputHelper.Replace(
                 replacements, sourceFiles, wholeWord, caseSensitive, preserveCase, throwExceptions, styling);
         }
 
@@ -277,25 +277,25 @@ namespace TextReplaceAPI
         /// <exception cref="InvalidXmlStructureException">
         /// The XML data within a .docx or .xlsx file has an incorrect structure and could not be parsed.
         /// </exception>
-        public bool PerformReplacements(
+        public bool Replace(
             bool wholeWord,
             bool caseSensitive,
             bool preserveCase,
             OutputFileStyling? styling = null,
             bool throwExceptions = true)
         {
-            // If throwExceptions is true, PerformReplacements() will allow exceptions to bubble up to the caller.
-            // If it is false, PerformReplacements() will catch any exceptions and continues to write to
+            // If throwExceptions is true, Replace() will allow exceptions to bubble up to the caller.
+            // If it is false, Replace() will catch any exceptions and continues to write to
             // the remaining files. It will only allow an ArgumentException to bubble up to the caller if SourceFiles is empty.
             // This returns false if something went wrong, and true if all files wrote successfully.
 
             // If the Aho-Corasick matcher was pre-generated, use that.
             if (_matcher != null)
             {
-                return OutputHelper.PerformReplacements(
+                return OutputHelper.Replace(
                     ReplacePhrases, SourceFiles, _matcher, wholeWord, preserveCase, throwExceptions, styling);
             }
-            return OutputHelper.PerformReplacements(
+            return OutputHelper.Replace(
                 ReplacePhrases, SourceFiles, wholeWord, caseSensitive, preserveCase, throwExceptions, styling);
         }
 
@@ -421,7 +421,7 @@ namespace TextReplaceAPI
 
         /// <summary>
         /// Generates the Aho-Corasick matcher, which front-loads much of the processing time
-        /// rather than performing this operation when the PerformReplacements method is called.
+        /// rather than performing this operation when the Replace method is called.
         /// </summary>
         /// <param name="replacements"></param>
         /// <param name="caseSensitive"></param>
@@ -438,7 +438,7 @@ namespace TextReplaceAPI
 
         /// <summary>
         /// Clears the Aho-Corasick matcher, resulting in it being
-        /// generated within the PerformReplacements method.
+        /// generated within the Replace method.
         /// </summary>
         public void ClearAhoCorasickMatcher()
         {

@@ -11,6 +11,22 @@ namespace TextReplaceAPI.Tests
         private static readonly string RelativeMockOutputsPath = "../../../MockFiles/Outputs/";
         private static readonly string RelativeGeneratedFilePath = "../../GeneratedTestFiles/QuickReplaceTests/";
 
+
+        private void temp()
+        {
+            // using QuickReplace
+
+            var replacements = "my-replacements-file.csv";
+            var sources = new List<string> { "source-file-1.docx", "source-file-2.txt" };
+            var outputs = new List<string> { "output=file-1.docx", "output-file-2.txt" };
+
+            var quickReplace = new QuickReplace(replacements, sources, outputs);
+            quickReplace.Replace(wholeWord: true, caseSensitive: false, preserveCase: true);
+        }
+
+
+
+
         [Fact]
         public void QuickReplace_ConstructorReplacementsFromDict_ReplacePhrasesAndSourceFilesInitialized()
         {
@@ -181,7 +197,7 @@ namespace TextReplaceAPI.Tests
         [InlineData("source-resume.tsv", "output-resume.tsv")]
         [InlineData("source-resume.docx", "output-resume.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample.xlsx")]
-        public void PerformReplacementsNonStatic_ValidFiles_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceNonStatic_ValidFiles_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -195,7 +211,7 @@ namespace TextReplaceAPI.Tests
 
             // Act
             var QuickReplace = new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames);
-            var actual = QuickReplace.PerformReplacements(wholeWord: false, caseSensitive: false, preserveCase: false);
+            var actual = QuickReplace.Replace(wholeWord: false, caseSensitive: false, preserveCase: false);
 
             // Assert
             Assert.True(actual);
@@ -221,7 +237,7 @@ namespace TextReplaceAPI.Tests
         [InlineData("source-resume.tsv", "output-resume.tsv")]
         [InlineData("source-resume.docx", "output-resume.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample.xlsx")]
-        public void PerformReplacementsNonStatic_ValidFilesNonNullMatcher_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceNonStatic_ValidFilesNonNullMatcher_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -235,7 +251,7 @@ namespace TextReplaceAPI.Tests
             // Act
             var QuickReplace = new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames, preGenerateMatcher: true, caseSensitive: false);
             var matcherActual = QuickReplace.IsMatcherCreated();
-            var actual = QuickReplace.PerformReplacements(wholeWord: false, caseSensitive: false, preserveCase: false);
+            var actual = QuickReplace.Replace(wholeWord: false, caseSensitive: false, preserveCase: false);
 
             // Assert
             Assert.True(matcherActual);
@@ -262,7 +278,7 @@ namespace TextReplaceAPI.Tests
         [InlineData("source-resume.tsv", "output-resume.tsv")]
         [InlineData("source-resume.docx", "output-resume.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample.xlsx")]
-        public void PerformReplacementsStatic_ValidFiles_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_ValidFiles_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -277,7 +293,7 @@ namespace TextReplaceAPI.Tests
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false);
 
             // Assert
             Assert.True(actual);
@@ -298,7 +314,7 @@ namespace TextReplaceAPI.Tests
         }
 
         [Fact]
-        public void PerformReplacementsStatic_EmptySourceFiles_ThrowsArgumentException()
+        public void ReplaceStatic_EmptySourceFiles_ThrowsArgumentException()
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -314,9 +330,9 @@ namespace TextReplaceAPI.Tests
 
             // Act and Assert
             Assert.Throws<ArgumentException>(() =>
-                QuickReplace.PerformReplacements(replacePhrases, emptySourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: false));
+                QuickReplace.Replace(replacePhrases, emptySourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: false));
             Assert.Throws<ArgumentException>(() =>
-                QuickReplace.PerformReplacements(replacePhrases, emptySourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: true));
+                QuickReplace.Replace(replacePhrases, emptySourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: true));
 
             Assert.False(File.Exists(generatedFileName));
         }
@@ -327,7 +343,7 @@ namespace TextReplaceAPI.Tests
         [InlineData("source-resume.tsv", "output-resume.tsv")]
         [InlineData("source-resume.docx", "output-resume.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample.xlsx")]
-        public void PerformReplacementsStatic_OutputFileIsInUse_ThrowsIOException(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_OutputFileIsInUse_ThrowsIOException(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -350,7 +366,7 @@ namespace TextReplaceAPI.Tests
             using var writer = new StreamWriter(generatedFileName);
 
             // Act and Assert
-            Assert.Throws<IOException>(() => QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false));
+            Assert.Throws<IOException>(() => QuickReplace.Replace(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false));
         }
 
         [Theory]
@@ -358,7 +374,7 @@ namespace TextReplaceAPI.Tests
         [InlineData("source-financial-sample.xlsx", "output-resume.txt")]
         [InlineData("source-resume.docx", "output-financial-sample.xlsx")]
         [InlineData("source-financial-sample.xlsx", "output-resume.docx")]
-        public void PerformReplacementsStatic_InvalidFileTypeConversion_ThrowsNotSupportedException(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_InvalidFileTypeConversion_ThrowsNotSupportedException(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -374,7 +390,7 @@ namespace TextReplaceAPI.Tests
 
             // Act and Assert
             Assert.Throws<NotSupportedException>(() =>
-                QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false));
+                QuickReplace.Replace(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false));
         }
 
         [Theory]
@@ -382,7 +398,7 @@ namespace TextReplaceAPI.Tests
         [InlineData("output-financial-sample.xlsx", "source-resume.txt")]
         [InlineData("source-resume.docx", "output-financial-sample.xlsx")]
         [InlineData("output-financial-sample.xlsx", "source-resume.docx")]
-        public void PerformReplacementsStatic_InvalidFileTypeConversionThrowExceptionsFalse_ReturnsFalseReplacementsNotPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_InvalidFileTypeConversionThrowExceptionsFalse_ReturnsFalseReplacementsNotPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -401,7 +417,7 @@ namespace TextReplaceAPI.Tests
             }
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: false);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: false);
 
             // Assert
             Assert.False(actual);
@@ -409,7 +425,7 @@ namespace TextReplaceAPI.Tests
         }
 
         [Fact]
-        public void PerformReplacementsStatic_OneFileCantBeReplaced_ReturnsFalseButReplacementsPerformedOnAllOtherFiles()
+        public void ReplaceStatic_OneFileCantBeReplaced_ReturnsFalseButReplacementsPerformedOnAllOtherFiles()
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -444,7 +460,7 @@ namespace TextReplaceAPI.Tests
             }
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: false);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false, throwExceptions: false);
 
             // Assert
             Assert.False(actual);
@@ -490,7 +506,7 @@ namespace TextReplaceAPI.Tests
         [InlineData("source-resume.tsv", "output-resume-whole-word.tsv")]
         [InlineData("source-resume.docx", "output-resume-whole-word.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample-whole-word.xlsx")]
-        public void PerformReplacementsStatic_WholeWord_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_WholeWord_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -505,7 +521,7 @@ namespace TextReplaceAPI.Tests
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: true, caseSensitive: false, preserveCase: false);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, wholeWord: true, caseSensitive: false, preserveCase: false);
 
             // Assert
             Assert.True(actual);
@@ -531,7 +547,7 @@ namespace TextReplaceAPI.Tests
         [InlineData("source-resume.tsv", "output-resume-case-sensitive.tsv")]
         [InlineData("source-resume.docx", "output-resume-case-sensitive.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample-case-sensitive.xlsx")]
-        public void PerformReplacementsStatic_CaseSensitive_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_CaseSensitive_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -546,7 +562,7 @@ namespace TextReplaceAPI.Tests
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: true, preserveCase: false);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: true, preserveCase: false);
 
             // Assert
             Assert.True(actual);
@@ -572,7 +588,7 @@ namespace TextReplaceAPI.Tests
         [InlineData("source-resume.tsv", "output-resume-preserve-case.tsv")]
         [InlineData("source-resume.docx", "output-resume-preserve-case.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample-preserve-case.xlsx")]
-        public void PerformReplacementsStatic_PreserveCase_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_PreserveCase_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -587,7 +603,7 @@ namespace TextReplaceAPI.Tests
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: true);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: true);
 
             // Assert
             Assert.True(actual);
@@ -613,7 +629,7 @@ namespace TextReplaceAPI.Tests
         [InlineData("source-resume.tsv", "output-resume-wwccpc.tsv")]
         [InlineData("source-resume.docx", "output-resume-wwccpc.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample-wwccpc.xlsx")]
-        public void PerformReplacementsStatic_WholeWordCaseSensitiveAndPreserveCase_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_WholeWordCaseSensitiveAndPreserveCase_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -628,7 +644,7 @@ namespace TextReplaceAPI.Tests
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, wholeWord: true, caseSensitive: true, preserveCase: true);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, wholeWord: true, caseSensitive: true, preserveCase: true);
 
             // Assert
             Assert.True(actual);
@@ -651,7 +667,7 @@ namespace TextReplaceAPI.Tests
         [Theory]
         [InlineData("source-resume.docx", "output-resume-bold.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample-bold.xlsx")]
-        public void PerformReplacementsStatic_Bold_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_Bold_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -668,7 +684,7 @@ namespace TextReplaceAPI.Tests
             var styling = new OutputFileStyling(bold: true);
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -691,7 +707,7 @@ namespace TextReplaceAPI.Tests
         [Theory]
         [InlineData("source-resume.docx", "output-resume-italics.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample-italics.xlsx")]
-        public void PerformReplacementsStatic_Italics_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_Italics_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -708,7 +724,7 @@ namespace TextReplaceAPI.Tests
             var styling = new OutputFileStyling(italics: true);
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -731,7 +747,7 @@ namespace TextReplaceAPI.Tests
         [Theory]
         [InlineData("source-resume.docx", "output-resume-underline.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample-underline.xlsx")]
-        public void PerformReplacementsStatic_Underline_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_Underline_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -748,7 +764,7 @@ namespace TextReplaceAPI.Tests
             var styling = new OutputFileStyling(underline: true);
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -771,7 +787,7 @@ namespace TextReplaceAPI.Tests
         [Theory]
         [InlineData("source-resume.docx", "output-resume-strikethrough.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample-strikethrough.xlsx")]
-        public void PerformReplacementsStatic_Strikethrough_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_Strikethrough_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -788,7 +804,7 @@ namespace TextReplaceAPI.Tests
             var styling = new OutputFileStyling(strikethrough: true);
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -811,7 +827,7 @@ namespace TextReplaceAPI.Tests
         [Theory]
         [InlineData("source-resume.docx", "output-resume-highlight-red.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample-highlight-red.xlsx")]
-        public void PerformReplacementsStatic_HighlightRed_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_HighlightRed_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -828,7 +844,7 @@ namespace TextReplaceAPI.Tests
             var styling = new OutputFileStyling(highlightColor: "#FF0000");
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -851,7 +867,7 @@ namespace TextReplaceAPI.Tests
         [Theory]
         [InlineData("source-resume.docx", "output-resume-text-color-blue.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample-text-color-blue.xlsx")]
-        public void PerformReplacementsStatic_TextColorBlue_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_TextColorBlue_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -868,7 +884,7 @@ namespace TextReplaceAPI.Tests
             var styling = new OutputFileStyling(textColor: "#0000FF");
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -891,7 +907,7 @@ namespace TextReplaceAPI.Tests
         [Theory]
         [InlineData("source-resume.docx", "output-resume-all-styles.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample-all-styles.xlsx")]
-        public void PerformReplacementsStatic_AllStyling_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_AllStyling_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -908,7 +924,7 @@ namespace TextReplaceAPI.Tests
             var styling = new OutputFileStyling(true, true, true, true, "#FF0000", "#0000FF");
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling: styling);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
 
             // Assert
             Assert.True(actual);
@@ -931,7 +947,7 @@ namespace TextReplaceAPI.Tests
         [Theory]
         [InlineData("source-resume-split-runs.docx", "output-resume-split-runs.docx")]
         [InlineData("source-financial-sample-split-runs.xlsx", "output-financial-sample-split-runs.xlsx")]
-        public void PerformReplacementsStatic_SplitRunsInSources_ReturnsTrueReplacementsPerformedCorrectly(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_SplitRunsInSources_ReturnsTrueReplacementsPerformedCorrectly(string sourceFileName, string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -946,7 +962,7 @@ namespace TextReplaceAPI.Tests
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false);
 
             // Assert
             Assert.True(actual);
@@ -960,7 +976,7 @@ namespace TextReplaceAPI.Tests
         [InlineData("source-resume-nested-replacements.txt", "output-resume-nested-replacements.txt")]
         [InlineData("source-resume-nested-replacements.docx", "output-resume-nested-replacements.docx")]
         [InlineData("source-financial-sample-nested-replacements.xlsx", "output-financial-sample-nested-replacements.xlsx")]
-        public void PerformReplacementsStatic_NestedReplacements_ReturnsTrueReplacementsPerformedCorrectly(string sourceFileName, string outputFileName)
+        public void ReplaceStatic_NestedReplacements_ReturnsTrueReplacementsPerformedCorrectly(string sourceFileName, string outputFileName)
         {
             // If replacements are nested (such as "there" and "her", they are supposed to be handled as follows:
             //      if two matches are nexted, favor the one that starts first
@@ -981,7 +997,7 @@ namespace TextReplaceAPI.Tests
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false);
 
             // Assert
             Assert.True(actual);
@@ -1002,7 +1018,7 @@ namespace TextReplaceAPI.Tests
         }
 
         [Fact]
-        public void PerformReplacementsStatic_TextToDocx_ReturnsTrueReplacementsPerformed()
+        public void ReplaceStatic_TextToDocx_ReturnsTrueReplacementsPerformed()
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -1017,7 +1033,7 @@ namespace TextReplaceAPI.Tests
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false);
 
             // Assert
             Assert.True(actual);
@@ -1028,7 +1044,7 @@ namespace TextReplaceAPI.Tests
         }
 
         [Fact]
-        public void PerformReplacementsStatic_TextToDocxAllStyling_ReturnsTrueReplacementsPerformed()
+        public void ReplaceStatic_TextToDocxAllStyling_ReturnsTrueReplacementsPerformed()
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -1045,7 +1061,7 @@ namespace TextReplaceAPI.Tests
             var styling = new OutputFileStyling(true, true, true, true, "#FF0000", "#0000FF");
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling);
 
             // Assert
             Assert.True(actual);
@@ -1056,7 +1072,7 @@ namespace TextReplaceAPI.Tests
         }
 
         [Fact]
-        public void PerformReplacementsStatic_DocxToText_ReturnsTrueReplacementsPerformed()
+        public void ReplaceStatic_DocxToText_ReturnsTrueReplacementsPerformed()
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -1073,7 +1089,7 @@ namespace TextReplaceAPI.Tests
             var styling = new OutputFileStyling(true, true, true, true, "#FF0000", "#0000FF");
 
             // Act
-            var actual = QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false, styling);
+            var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling);
 
             // Assert
             Assert.True(actual);
@@ -1086,7 +1102,7 @@ namespace TextReplaceAPI.Tests
         [Theory]
         [InlineData("source-resume.txt")]
         [InlineData("source-resume.docx")]
-        public void PerformReplacementsStatic_AnythingToExcel_ThrowsNotSupportedException(string sourceFileName)
+        public void ReplaceStatic_AnythingToExcel_ThrowsNotSupportedException(string sourceFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-nested.csv";
@@ -1100,13 +1116,13 @@ namespace TextReplaceAPI.Tests
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act and Assert
-            Assert.Throws<NotSupportedException>(() => QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false));
+            Assert.Throws<NotSupportedException>(() => QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false));
         }
 
         [Theory]
         [InlineData("output-financial-sample.txt")]
         [InlineData("output-financial-sample.docx")]
-        public void PerformReplacementsStatic_ExcelToAnything_ThrowsNotSupportedException(string outputFileName)
+        public void ReplaceStatic_ExcelToAnything_ThrowsNotSupportedException(string outputFileName)
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-nested.csv";
@@ -1120,7 +1136,7 @@ namespace TextReplaceAPI.Tests
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
             // Act and Assert
-            Assert.Throws<NotSupportedException>(() => QuickReplace.PerformReplacements(replacePhrases, sourceFiles, false, false, false));
+            Assert.Throws<NotSupportedException>(() => QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false));
         }
 
         [Theory]
