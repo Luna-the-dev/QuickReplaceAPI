@@ -11,22 +11,6 @@ namespace TextReplaceAPI.Tests
         private static readonly string RelativeMockOutputsPath = "../../../MockFiles/Outputs/";
         private static readonly string RelativeGeneratedFilePath = "../../GeneratedTestFiles/QuickReplaceTests/";
 
-
-        private void temp()
-        {
-            // using QuickReplace
-
-            var replacements = "my-replacements-file.csv";
-            var sources = new List<string> { "source-file-1.docx", "source-file-2.txt" };
-            var outputs = new List<string> { "output=file-1.docx", "output-file-2.txt" };
-
-            var quickReplace = new QuickReplace(replacements, sources, outputs);
-            quickReplace.Replace(wholeWord: true, caseSensitive: false, preserveCase: true);
-        }
-
-
-
-
         [Fact]
         public void QuickReplace_ConstructorReplacementsFromDict_ReplacePhrasesAndSourceFilesInitialized()
         {
