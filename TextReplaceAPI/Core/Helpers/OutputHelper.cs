@@ -28,7 +28,7 @@ namespace TextReplaceAPI.Core.Helpers
         /// <param name="styling"></param>
         /// <returns>True if all files were written successfully, false if at least one file failed.</returns>
         /// <exception cref="ArgumentException"></exception>
-        public static bool PerformReplacements(
+        public static bool Replace(
             Dictionary<string, string> replacePhrases,
             IEnumerable<SourceFile> sourceFiles,
             bool wholeWord,
@@ -77,7 +77,7 @@ namespace TextReplaceAPI.Core.Helpers
         /// <param name="styling"></param>
         /// <returns>True if all files were written successfully, false if at least one file failed.</returns>
         /// <exception cref="ArgumentException"></exception>
-        public static bool PerformReplacements(
+        public static bool Replace(
             Dictionary<string, string> replacePhrases,
             IEnumerable<SourceFile> sourceFiles,
             AhoCorasickStringSearcher matcher,
