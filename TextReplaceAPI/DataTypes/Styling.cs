@@ -50,6 +50,12 @@ namespace TextReplaceAPI.DataTypes
             _textColor = FormatColorString(textColor);
         }
 
+        /// <summary>
+        /// For internal use only. Styles a .docx run.
+        /// </summary>
+        /// <param name="runProps"></param>
+        /// <param name="style"></param>
+        /// <returns>OpenXML RunProperties with styling applied</returns>
         public static Wordprocessing.RunProperties StyleRunProperties(
             Wordprocessing.RunProperties runProps, Styling style)
         {
@@ -99,6 +105,12 @@ namespace TextReplaceAPI.DataTypes
             return runProps;
         }
 
+        /// <summary>
+        /// For internal use only. Styles an .xlsx run.
+        /// </summary>
+        /// <param name="runProps"></param>
+        /// <param name="style"></param>
+        /// <returns>OpenXML RunProperties with styling applied</returns>
         public static Spreadsheet.RunProperties StyleRunProperties(
             Spreadsheet.RunProperties runProps, Styling style)
         {
