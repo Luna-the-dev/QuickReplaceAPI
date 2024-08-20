@@ -83,50 +83,50 @@ namespace TextReplaceAPI.Benchmarks
         //////////////////////
 
         [Benchmark]
-        public void PerformReplacements_Bible_NoPreGeneration()
+        public void Replace_Bible_NoPreGeneration()
         {
             if (qrBible == null)
             {
                 throw new NullReferenceException("The QuickReplace object is null.");
             }
 
-            qrBible.PerformReplacements(false, false, false);
+            qrBible.Replace(false, false, false);
             File.Delete(qrBible.SourceFiles[0].OutputFileName);
         }
 
         [Benchmark]
-        public void PerformReplacements_Lotr_NoPreGeneration()
+        public void Replace_Lotr_NoPreGeneration()
         {
             if (qrLotr == null)
             {
                 throw new NullReferenceException("The QuickReplace object is null.");
             }
 
-            qrLotr.PerformReplacements(false, false, false);
+            qrLotr.Replace(false, false, false);
             File.Delete(qrLotr.SourceFiles[0].OutputFileName);
         }
 
         [Benchmark]
-        public void PerformReplacements_HarryPotter_NoPreGeneration()
+        public void Replace_HarryPotter_NoPreGeneration()
         {
             if (qrHarryPotter == null)
             {
                 throw new NullReferenceException("The QuickReplace object is null.");
             }
 
-            qrHarryPotter.PerformReplacements(false, false, false);
+            qrHarryPotter.Replace(false, false, false);
             File.Delete(qrHarryPotter.SourceFiles[0].OutputFileName);
         }
 
         [Benchmark]
-        public void PerformReplacements_HundredResumes_NoPreGeneration()
+        public void Replace_HundredResumes_NoPreGeneration()
         {
             if (qrHundredResumes == null)
             {
                 throw new NullReferenceException("The QuickReplace object is null.");
             }
 
-            qrHundredResumes.PerformReplacements(false, false, false);
+            qrHundredResumes.Replace(false, false, false);
             foreach (var sourceFile in qrHundredResumes.SourceFiles)
             {
                 File.Delete(sourceFile.OutputFileName);
@@ -134,14 +134,14 @@ namespace TextReplaceAPI.Benchmarks
         }
 
         [Benchmark]
-        public void PerformReplacements_Spreadsheet_NoPreGeneration()
+        public void Replace_Spreadsheet_NoPreGeneration()
         {
             if (qrSpreadsheet == null)
             {
                 throw new NullReferenceException("The QuickReplace object is null.");
             }
 
-            qrSpreadsheet.PerformReplacements(false, false, false);
+            qrSpreadsheet.Replace(false, false, false);
             File.Delete(qrSpreadsheet.SourceFiles[0].OutputFileName);
         }
 
@@ -150,50 +150,50 @@ namespace TextReplaceAPI.Benchmarks
         ///////////////////
 
         [Benchmark]
-        public void PerformReplacements_Bible_PreGeneration()
+        public void Replace_Bible_PreGeneration()
         {
             if (qrMatcherBible == null)
             {
                 throw new NullReferenceException("The QuickReplace object is null.");
             }
 
-            qrMatcherBible.PerformReplacements(false, false, false);
+            qrMatcherBible.Replace(false, false, false);
             File.Delete(qrMatcherBible.SourceFiles[0].OutputFileName);
         }
 
         [Benchmark]
-        public void PerformReplacements_Lotr_PreGeneration()
+        public void Replace_Lotr_PreGeneration()
         {
             if (qrMatcherLotr == null)
             {
                 throw new NullReferenceException("The QuickReplace object is null.");
             }
 
-            qrMatcherLotr.PerformReplacements(false, false, false);
+            qrMatcherLotr.Replace(false, false, false);
             File.Delete(qrMatcherLotr.SourceFiles[0].OutputFileName);
         }
 
         [Benchmark]
-        public void PerformReplacements_HarryPotter_PreGeneration()
+        public void Replace_HarryPotter_PreGeneration()
         {
             if (qrMatcherHarryPotter == null)
             {
                 throw new NullReferenceException("The QuickReplace object is null.");
             }
 
-            qrMatcherHarryPotter.PerformReplacements(false, false, false);
+            qrMatcherHarryPotter.Replace(false, false, false);
             File.Delete(qrMatcherHarryPotter.SourceFiles[0].OutputFileName);
         }
 
         [Benchmark]
-        public void PerformReplacements_HundredResumes_PreGeneration()
+        public void Replace_HundredResumes_PreGeneration()
         {
             if (qrMatcherHundredResumes == null)
             {
                 throw new NullReferenceException("The QuickReplace object is null.");
             }
 
-            qrMatcherHundredResumes.PerformReplacements(false, false, false);
+            qrMatcherHundredResumes.Replace(false, false, false);
             foreach (var sourceFile in qrMatcherHundredResumes.SourceFiles)
             {
                 File.Delete(sourceFile.OutputFileName);
@@ -201,14 +201,14 @@ namespace TextReplaceAPI.Benchmarks
         }
 
         [Benchmark]
-        public void PerformReplacements_Spreadsheet_PreGeneration()
+        public void Replace_Spreadsheet_PreGeneration()
         {
             if (qrMatcherSpreadsheet == null)
             {
                 throw new NullReferenceException("The QuickReplace object is null.");
             }
 
-            qrMatcherSpreadsheet.PerformReplacements(false, false, false);
+            qrMatcherSpreadsheet.Replace(false, false, false);
             File.Delete(qrMatcherSpreadsheet.SourceFiles[0].OutputFileName);
         }
 
@@ -223,7 +223,7 @@ namespace TextReplaceAPI.Benchmarks
                 return -1;
             }
 
-            PerformReplacements_Bible_PreGeneration();
+            Replace_Bible_PreGeneration();
             return qrMatcherBible.SourceFiles[0].NumOfReplacements;
         }
 
@@ -234,7 +234,7 @@ namespace TextReplaceAPI.Benchmarks
                 return -1;
             }
 
-            PerformReplacements_Lotr_PreGeneration();
+            Replace_Lotr_PreGeneration();
             return qrMatcherLotr.SourceFiles[0].NumOfReplacements;
         }
 
@@ -245,7 +245,7 @@ namespace TextReplaceAPI.Benchmarks
                 return -1;
             }
 
-            PerformReplacements_HarryPotter_PreGeneration();
+            Replace_HarryPotter_PreGeneration();
             return qrMatcherHarryPotter.SourceFiles[0].NumOfReplacements;
         }
 
@@ -256,7 +256,7 @@ namespace TextReplaceAPI.Benchmarks
                 return -1;
             }
 
-            PerformReplacements_HundredResumes_PreGeneration();
+            Replace_HundredResumes_PreGeneration();
 
             int numOfReplacements = 0;
             foreach (var sourceFile in qrMatcherHundredResumes.SourceFiles)
@@ -273,7 +273,7 @@ namespace TextReplaceAPI.Benchmarks
                 return -1;
             }
 
-            PerformReplacements_Spreadsheet_PreGeneration();
+            Replace_Spreadsheet_PreGeneration();
             return qrMatcherSpreadsheet.SourceFiles[0].NumOfReplacements;
         }
     }

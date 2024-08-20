@@ -150,7 +150,7 @@ namespace TextReplaceAPI
             // generate the matcher
             if (preGenerateMatcher)
             {
-                GenerateAhoCorasickMatcher(caseSensitive);
+                GenerateMatcher(caseSensitive);
             }
         }
 
@@ -203,7 +203,7 @@ namespace TextReplaceAPI
             // generate the matcher
             if (preGenerateMatcher)
             {
-                GenerateAhoCorasickMatcher(caseSensitive);
+                GenerateMatcher(caseSensitive);
             }
         }
 
@@ -238,10 +238,10 @@ namespace TextReplaceAPI
         public static bool Replace(
             Dictionary<string, string> replacements,
             IEnumerable<SourceFile> sourceFiles,
-            bool wholeWord,
-            bool caseSensitive,
-            bool preserveCase,
-            OutputFileStyling? styling = null,
+            bool wholeWord = false,
+            bool caseSensitive = false,
+            bool preserveCase = false,
+            Styling? styling = null,
             bool throwExceptions = true)
         {
             // If throwExceptions is true, Replace() will allow exceptions to bubble up to the caller.
@@ -278,10 +278,10 @@ namespace TextReplaceAPI
         /// The XML data within a .docx or .xlsx file has an incorrect structure and could not be parsed.
         /// </exception>
         public bool Replace(
-            bool wholeWord,
-            bool caseSensitive,
-            bool preserveCase,
-            OutputFileStyling? styling = null,
+            bool wholeWord = false,
+            bool caseSensitive = false,
+            bool preserveCase = false,
+            Styling? styling = null,
             bool throwExceptions = true)
         {
             // If throwExceptions is true, Replace() will allow exceptions to bubble up to the caller.
@@ -426,7 +426,7 @@ namespace TextReplaceAPI
         /// <param name="replacements"></param>
         /// <param name="caseSensitive"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        public void GenerateAhoCorasickMatcher(bool caseSensitive)
+        public void GenerateMatcher(bool caseSensitive)
         {
             if (ReplacePhrases.Count == 0)
             {
@@ -440,7 +440,7 @@ namespace TextReplaceAPI
         /// Clears the Aho-Corasick matcher, resulting in it being
         /// generated within the Replace method.
         /// </summary>
-        public void ClearAhoCorasickMatcher()
+        public void ClearMatcher()
         {
             _matcher = null;
         }

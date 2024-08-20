@@ -87,7 +87,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
             Wordprocessing.Paragraph paragraph,
             Dictionary<string, string> replacePhrases,
             AhoCorasickStringSearcher matcher,
-            OutputFileStyling replaceStyling,
+            Styling replaceStyling,
             bool wholeWord,
             bool preserveCase,
             out int numOfMatches)
@@ -172,8 +172,8 @@ namespace TextReplaceAPI.Core.AhoCorasick
                     var replaceRunProps = runs[i].RunProperties?.CloneNode(true);
                     // set custom styling properties
                     var newReplaceRunProps = (replaceRunProps != null) ?
-                        OutputFileStyling.StyleRunProperties((Wordprocessing.RunProperties)replaceRunProps, replaceStyling) :
-                        OutputFileStyling.StyleRunProperties(new Wordprocessing.RunProperties(), replaceStyling);
+                        Styling.StyleRunProperties((Wordprocessing.RunProperties)replaceRunProps, replaceStyling) :
+                        Styling.StyleRunProperties(new Wordprocessing.RunProperties(), replaceStyling);
                     replaceRun.Append(newReplaceRunProps);
                     // preserve the original case of the word that is being replaced if that option is set
                     string replacement = (preserveCase) ?
@@ -379,7 +379,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
             string text,
             Dictionary<string, string> replacePhrases,
             AhoCorasickStringSearcher matcher,
-            OutputFileStyling replaceStyling,
+            Styling replaceStyling,
             bool wholeWord,
             bool preserveCase,
             out int numOfMatches)
@@ -431,7 +431,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
                 // create new run containing the text from the replacement
                 var replaceRun = new Wordprocessing.Run();
                 // set custom styling properties
-                var replaceRunProps = OutputFileStyling.StyleRunProperties(new Wordprocessing.RunProperties(), replaceStyling);
+                var replaceRunProps = Styling.StyleRunProperties(new Wordprocessing.RunProperties(), replaceStyling);
                 replaceRun.Append(replaceRunProps);
                 // preserve the original case of the word that is being replaced if that option is set
                 string replacement = (preserveCase) ?
@@ -481,7 +481,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
             Spreadsheet.SharedStringItem sharedStringItem,
             Dictionary<string, string> replacePhrases,
             AhoCorasickStringSearcher matcher,
-            OutputFileStyling replaceStyling,
+            Styling replaceStyling,
             bool wholeWord,
             bool preserveCase,
             out int numOfMatches,
@@ -572,8 +572,8 @@ namespace TextReplaceAPI.Core.AhoCorasick
                     var replaceRunProps = runs[i].RunProperties?.CloneNode(true);
                     // set custom styling properties
                     var newReplaceRunProps = (replaceRunProps != null) ?
-                        OutputFileStyling.StyleRunProperties((Spreadsheet.RunProperties)replaceRunProps, replaceStyling) :
-                        OutputFileStyling.StyleRunProperties(new Spreadsheet.RunProperties(), replaceStyling);
+                        Styling.StyleRunProperties((Spreadsheet.RunProperties)replaceRunProps, replaceStyling) :
+                        Styling.StyleRunProperties(new Spreadsheet.RunProperties(), replaceStyling);
                     replaceRun.Append(newReplaceRunProps);
                     // preserve the original case of the word that is being replaced if that option is set
                     string replacement = (preserveCase) ?

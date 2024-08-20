@@ -35,7 +35,7 @@ namespace TextReplaceAPI.Core.Helpers
             bool caseSensitive,
             bool preserveCase,
             bool throwExceptions,
-            OutputFileStyling? styling = null)
+            Styling? styling = null)
         {
             if (sourceFiles.Any() == false)
             {
@@ -84,7 +84,7 @@ namespace TextReplaceAPI.Core.Helpers
             bool wholeWord,
             bool preserveCase,
             bool throwExceptions,
-            OutputFileStyling? styling = null)
+            Styling? styling = null)
         {
             if (sourceFiles.Any() == false)
             {
@@ -113,7 +113,7 @@ namespace TextReplaceAPI.Core.Helpers
             bool wholeWord,
             bool preserveCase,
             bool throwExceptions,
-            OutputFileStyling? styling = null)
+            Styling? styling = null)
         {
             if (throwExceptions)
             {
@@ -156,7 +156,7 @@ namespace TextReplaceAPI.Core.Helpers
         /// <param name="preserveCase"></param>
         /// <returns>The number of replacements that were made. Returns -1 if the replacements could not be made.</returns>
         private static int TryWriteReplacementsToFile(Dictionary<string, string> replacePhrases,
-            string src, string dest, AhoCorasickStringSearcher matcher, bool wholeWord, bool preserveCase, OutputFileStyling? styling = null)
+            string src, string dest, AhoCorasickStringSearcher matcher, bool wholeWord, bool preserveCase, Styling? styling = null)
         {
             try
             {
@@ -181,9 +181,9 @@ namespace TextReplaceAPI.Core.Helpers
         /// <exception cref="DirectoryNotFoundException"></exception>
         /// <exception cref="IOException"></exception>
         private static int WriteReplacementsToFile(Dictionary<string, string> replacePhrases,
-            string src, string dest, AhoCorasickStringSearcher matcher, bool wholeWord, bool preserveCase, OutputFileStyling? styling = null)
+            string src, string dest, AhoCorasickStringSearcher matcher, bool wholeWord, bool preserveCase, Styling? styling = null)
         {
-            styling ??= new OutputFileStyling();
+            styling ??= new Styling();
 
             if (File.Exists(src) == false)
             {
@@ -281,7 +281,7 @@ namespace TextReplaceAPI.Core.Helpers
         /// <param name="isWholeWord"></param>
         /// <param name="isPreserveCase"></param>
         private static int ReadFromTextCsvTsvWriteToDocx(Dictionary<string, string> replacePhrases,
-            string src, string dest, AhoCorasickStringSearcher matcher, OutputFileStyling styling, bool isWholeWord, bool isPreserveCase)
+            string src, string dest, AhoCorasickStringSearcher matcher, Styling styling, bool isWholeWord, bool isPreserveCase)
         {
             int numOfMatches = 0;
             bool styleReplacements =
@@ -403,7 +403,7 @@ namespace TextReplaceAPI.Core.Helpers
             Dictionary<string, string> replacePhrases,
             string src, string dest,
             AhoCorasickStringSearcher matcher,
-            OutputFileStyling styling,
+            Styling styling,
             bool isWholeWord, bool isPreserveCase)
         {
             int numOfMatches = 0;
@@ -466,7 +466,7 @@ namespace TextReplaceAPI.Core.Helpers
         /// <param name="isPreserveCase"></param>
         /// <exception cref="InvalidXmlStructureException"></exception>
         private static int ReadFromExcelWriteToExcel(Dictionary<string, string> replacePhrases,
-            string src, string dest, AhoCorasickStringSearcher matcher, OutputFileStyling styling, bool isWholeWord, bool isPreserveCase)
+            string src, string dest, AhoCorasickStringSearcher matcher, Styling styling, bool isWholeWord, bool isPreserveCase)
         {
             int numOfMatches = 0;
             bool styleReplacements =

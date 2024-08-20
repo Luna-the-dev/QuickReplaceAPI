@@ -4,7 +4,7 @@ using Wordprocessing = DocumentFormat.OpenXml.Wordprocessing;
 
 namespace TextReplaceAPI.DataTypes
 {
-    public partial class OutputFileStyling
+    public partial class Styling
     {
         public bool Bold { get; set; }
 
@@ -32,7 +32,7 @@ namespace TextReplaceAPI.DataTypes
             set { _textColor = FormatColorString(value); }
         }
 
-        public OutputFileStyling(
+        public Styling(
             bool bold = false,
             bool italics = false,
             bool underline = false,
@@ -51,7 +51,7 @@ namespace TextReplaceAPI.DataTypes
         }
 
         public static Wordprocessing.RunProperties StyleRunProperties(
-            Wordprocessing.RunProperties runProps, OutputFileStyling style)
+            Wordprocessing.RunProperties runProps, Styling style)
         {
             if (style.Bold)
             {
@@ -100,7 +100,7 @@ namespace TextReplaceAPI.DataTypes
         }
 
         public static Spreadsheet.RunProperties StyleRunProperties(
-            Spreadsheet.RunProperties runProps, OutputFileStyling style)
+            Spreadsheet.RunProperties runProps, Styling style)
         {
             if (style.Bold)
             {

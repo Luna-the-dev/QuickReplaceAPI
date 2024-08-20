@@ -665,7 +665,7 @@ namespace TextReplaceAPI.Tests
             var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
-            var styling = new OutputFileStyling(bold: true);
+            var styling = new Styling(bold: true);
 
             // Act
             var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
@@ -705,7 +705,7 @@ namespace TextReplaceAPI.Tests
             var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
-            var styling = new OutputFileStyling(italics: true);
+            var styling = new Styling(italics: true);
 
             // Act
             var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
@@ -745,7 +745,7 @@ namespace TextReplaceAPI.Tests
             var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
-            var styling = new OutputFileStyling(underline: true);
+            var styling = new Styling(underline: true);
 
             // Act
             var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
@@ -785,7 +785,7 @@ namespace TextReplaceAPI.Tests
             var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
-            var styling = new OutputFileStyling(strikethrough: true);
+            var styling = new Styling(strikethrough: true);
 
             // Act
             var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
@@ -825,7 +825,7 @@ namespace TextReplaceAPI.Tests
             var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
-            var styling = new OutputFileStyling(highlightColor: "#FF0000");
+            var styling = new Styling(highlightColor: "#FF0000");
 
             // Act
             var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
@@ -865,7 +865,7 @@ namespace TextReplaceAPI.Tests
             var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
-            var styling = new OutputFileStyling(textColor: "#0000FF");
+            var styling = new Styling(textColor: "#0000FF");
 
             // Act
             var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
@@ -905,7 +905,7 @@ namespace TextReplaceAPI.Tests
             var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
-            var styling = new OutputFileStyling(true, true, true, true, "#FF0000", "#0000FF");
+            var styling = new Styling(true, true, true, true, "#FF0000", "#0000FF");
 
             // Act
             var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling: styling);
@@ -1042,7 +1042,7 @@ namespace TextReplaceAPI.Tests
             var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
-            var styling = new OutputFileStyling(true, true, true, true, "#FF0000", "#0000FF");
+            var styling = new Styling(true, true, true, true, "#FF0000", "#0000FF");
 
             // Act
             var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling);
@@ -1070,7 +1070,7 @@ namespace TextReplaceAPI.Tests
             var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
             var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
 
-            var styling = new OutputFileStyling(true, true, true, true, "#FF0000", "#0000FF");
+            var styling = new Styling(true, true, true, true, "#FF0000", "#0000FF");
 
             // Act
             var actual = QuickReplace.Replace(replacePhrases, sourceFiles, false, false, false, styling);
@@ -1390,7 +1390,7 @@ namespace TextReplaceAPI.Tests
         }
 
         [Fact]
-        public void GenerateAhoCorasickMatcher_ValidReplacePhrases_SetsMatcher()
+        public void GenerateMatcher_ValidReplacePhrases_SetsMatcher()
         {
             // Arrange
             var replacePhrases = new Dictionary<string, string>
@@ -1409,7 +1409,7 @@ namespace TextReplaceAPI.Tests
             var expectedBeforeAct = QuickReplace.IsMatcherCreated();
 
             // Act
-            QuickReplace.GenerateAhoCorasickMatcher(true);
+            QuickReplace.GenerateMatcher(true);
             var expectedAfterAct = QuickReplace.IsMatcherCreated();
 
             // Assert
@@ -1418,7 +1418,7 @@ namespace TextReplaceAPI.Tests
         }
 
         [Fact]
-        public void GenerateAhoCorasickMatcher_EmptyReplacePhrases_ThrowsInvalidOperationException()
+        public void GenerateMatcher_EmptyReplacePhrases_ThrowsInvalidOperationException()
         {
             // Arrange
             var replacePhrases = new Dictionary<string, string>();
@@ -1429,11 +1429,11 @@ namespace TextReplaceAPI.Tests
             var QuickReplace = new QuickReplace(replacePhrases, sourceFileNames, outputFileNames);
 
             // Act and Assert
-            Assert.Throws<InvalidOperationException>(() => QuickReplace.GenerateAhoCorasickMatcher(true));
+            Assert.Throws<InvalidOperationException>(() => QuickReplace.GenerateMatcher(true));
         }
         
         [Fact]
-        public void ClearAhoCorasickMatcher_IsCalled_SetsMatcherToNull()
+        public void ClearMatcher_IsCalled_SetsMatcherToNull()
         {
             // Arrange
             var replacePhrases = new Dictionary<string, string>
@@ -1451,11 +1451,11 @@ namespace TextReplaceAPI.Tests
             var QuickReplace = new QuickReplace(replacePhrases, sourceFileNames, outputFileNames);
             var expected1 = QuickReplace.IsMatcherCreated();
 
-            QuickReplace.GenerateAhoCorasickMatcher(true);
+            QuickReplace.GenerateMatcher(true);
             var expected2 = QuickReplace.IsMatcherCreated();
 
             // Act
-            QuickReplace.ClearAhoCorasickMatcher();
+            QuickReplace.ClearMatcher();
             var expected3 = QuickReplace.IsMatcherCreated();
 
             // Assert
