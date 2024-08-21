@@ -18,18 +18,28 @@ namespace TextReplaceAPI.DataTypes
 
         public bool IsTextColored { get; set; }
 
-        private string _highlightColor;
+        private string _highlightColor = "000000";
         public string HighlightColor
         {
             get { return _highlightColor; }
-            set { _highlightColor = FormatColorString(value); }
+            set
+            {
+                var color = FormatColorString(value);
+                _highlightColor = color != string.Empty ? color : "000000";
+                IsHighlighted = color != string.Empty;
+            }
         }
 
-        private string _textColor;
+        private string _textColor = "000000";
         public string TextColor
         {
             get { return _textColor; }
-            set { _textColor = FormatColorString(value); }
+            set
+            {
+                var color = FormatColorString(value);
+                _textColor = color != string.Empty ? color : "000000";
+                IsTextColored = color != string.Empty;
+            }
         }
 
         public Styling(
@@ -44,10 +54,8 @@ namespace TextReplaceAPI.DataTypes
             Italics = italics;
             Underline = underline;
             Strikethrough = strikethrough;
-            IsHighlighted = (highlightColor != string.Empty);
-            IsTextColored = (textColor != string.Empty);
-            _highlightColor = FormatColorString(highlightColor);
-            _textColor = FormatColorString(textColor);
+            HighlightColor = FormatColorString(highlightColor);
+            TextColor = FormatColorString(textColor);
         }
 
         /// <summary>
@@ -160,13 +168,13 @@ namespace TextReplaceAPI.DataTypes
         {
             if (color == string.Empty)
             {
-                return "000000";
+                return "";
             }
 
             // check if the string starts off with a pound (optional) and contains 6 hex digits
             if (HexStringRegex().Match(color).Success == false)
             {
-                return "000000";
+                return "";
             }
 
             if (color[0] == '#')
