@@ -12,9 +12,9 @@ namespace TextReplaceAPI.DataTypes
 
         public bool Underline { get; set; }
 
-        public bool Strikethrough { get; set; }
+        public bool Strikethrough { get; private set; }
 
-        public bool IsHighlighted { get; set; }
+        public bool IsHighlighted { get; private set; }
 
         public bool IsTextColored { get; set; }
 
