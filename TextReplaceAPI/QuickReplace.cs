@@ -1,4 +1,5 @@
-﻿using TextReplaceAPI.Core.AhoCorasick;
+﻿using System.Diagnostics;
+using TextReplaceAPI.Core.AhoCorasick;
 using TextReplaceAPI.Core.Helpers;
 using TextReplaceAPI.Core.Validation;
 using TextReplaceAPI.DataTypes;
@@ -297,6 +298,107 @@ namespace TextReplaceAPI
             }
             return OutputHelper.Replace(
                 ReplacePhrases, SourceFiles, wholeWord, caseSensitive, preserveCase, throwExceptions, styling);
+        }
+
+        /// <summary>
+        /// Asynchronously searches through a list of source files, looking for instances of keys from 
+        /// the ReplacePhrases dict, replacing them with the associated value, and then
+        /// saving the resulting text off to a list of destination files.
+        /// 
+        /// If the "throwExceptions" flag is set to false and writing to one of the files failed,
+        /// the method will prevent the exception from bubbling up to the caller and continue
+        /// to write to the other files in the list.
+        /// </summary>
+        /// <param name="replacements"></param>
+        /// <param name="sourceFiles"></param>
+        /// <param name="wholeWord"></param>
+        /// <param name="caseSensitive"></param>
+        /// <param name="preserveCase"></param>
+        /// <param name="styling"></param>
+        /// <param name="throwExceptions"></param>
+        /// <returns>True is all replacements were made successfully, false if something went wrong.</returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="PathTooLongException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <exception cref="System.Security.SecurityException"></exception>
+        /// <exception cref="InvalidXmlStructureException">
+        /// The XML data within a .docx or .xlsx file has an incorrect structure and could not be parsed.
+        /// </exception>
+        public static async Task<bool> ReplaceAsync(
+            Dictionary<string, string> replacements,
+            IEnumerable<SourceFile> sourceFiles,
+            bool wholeWord = false,
+            bool caseSensitive = false,
+            bool preserveCase = false,
+            Styling? styling = null,
+            bool throwExceptions = true)
+        {
+            // If throwExceptions is true, Replace() will allow exceptions to bubble up to the caller.
+            // If it is false, Replace() will catch any exceptions and continues to write to
+            // the remaining files. It will only allow an ArgumentException to bubble up to the caller if SourceFiles is empty.
+            // This returns false if something went wrong, and true if all files wrote successfully.
+            var result = false;
+            await Task.Run(() =>
+            {
+                result = OutputHelper.Replace(
+                    replacements, sourceFiles, wholeWord, caseSensitive, preserveCase, throwExceptions, styling);
+            });
+            return result;
+        }
+
+        /// <summary>
+        /// Asynchronously earches through a list of source files, looking for instances of keys from 
+        /// the ReplacePhrases dict, replacing them with the associated value, and then
+        /// saving the resulting text off to a list of destination files.
+        /// 
+        /// If the "throwExceptions" flag is set to false and writing to one of the files failed,
+        /// the method will continue to write to the other files in the list.
+        /// </summary>
+        /// <param name="wholeWord"></param>
+        /// <param name="caseSensitive"></param>
+        /// <param name="preserveCase"></param>
+        /// <param name="styling"></param>
+        /// <param name="throwExceptions"></param>
+        /// <returns>True is all replacements were made successfully, false if something went wrong.</returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="PathTooLongException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <exception cref="System.Security.SecurityException"></exception>
+        /// <exception cref="InvalidXmlStructureException">
+        /// The XML data within a .docx or .xlsx file has an incorrect structure and could not be parsed.
+        /// </exception>
+        public async Task<bool> ReplaceAsync(
+            bool wholeWord = false,
+            bool caseSensitive = false,
+            bool preserveCase = false,
+            Styling? styling = null,
+            bool throwExceptions = true)
+        {
+            // If throwExceptions is true, Replace() will allow exceptions to bubble up to the caller.
+            // If it is false, Replace() will catch any exceptions and continues to write to
+            // the remaining files. It will only allow an ArgumentException to bubble up to the caller if SourceFiles is empty.
+            // This returns false if something went wrong, and true if all files wrote successfully.
+            var result = false;
+            await Task.Run(() =>
+            {
+                // If the Aho-Corasick matcher was pre-generated, use that.
+                if (_matcher != null)
+                {
+                    result = OutputHelper.Replace(
+                        ReplacePhrases, SourceFiles, _matcher, wholeWord, preserveCase, throwExceptions, styling);
+                }
+                result = OutputHelper.Replace(
+                    ReplacePhrases, SourceFiles, wholeWord, caseSensitive, preserveCase, throwExceptions, styling);
+            });
+            return result;
         }
 
         /// <summary>

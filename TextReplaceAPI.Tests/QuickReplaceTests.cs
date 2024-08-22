@@ -221,6 +221,46 @@ namespace TextReplaceAPI.Tests
         [InlineData("source-resume.tsv", "output-resume.tsv")]
         [InlineData("source-resume.docx", "output-resume.docx")]
         [InlineData("source-financial-sample.xlsx", "output-financial-sample.xlsx")]
+        public async Task ReplaceAsyncNonStatic_ValidFiles_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        {
+            // Arrange
+            var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
+
+            sourceFileName = RelativeSourcesPath + "Normal/" + sourceFileName;
+            var mockOutputName = RelativeMockOutputsPath + "Normal/" + outputFileName;
+            var generatedFileName = RelativeGeneratedFilePath + outputFileName;
+
+            var sourceFileNames = new List<string>() { sourceFileName };
+            var outputFileNames = new List<string>() { generatedFileName };
+
+            // Act
+            var QuickReplace = new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames);
+            var actual = await QuickReplace.ReplaceAsync(wholeWord: false, caseSensitive: false, preserveCase: false);
+
+            // Assert
+            Assert.True(actual);
+
+            // Compare the generated file to the mock file
+            if (Path.GetExtension(QuickReplace.SourceFiles.First().OutputFileName) == ".xlsx" ||
+                Path.GetExtension(QuickReplace.SourceFiles.First().OutputFileName) == ".docx")
+            {
+                Assert.True(FileComparer.FilesAreEqual_OpenXml(mockOutputName, generatedFileName));
+            }
+            else
+            {
+                Assert.True(FileComparer.FilesAreEqual(mockOutputName, generatedFileName));
+            }
+
+            // Cleanup
+            File.Delete(generatedFileName);
+        }
+
+        [Theory]
+        [InlineData("source-resume.txt", "output-resume.txt")]
+        [InlineData("source-resume.csv", "output-resume.csv")]
+        [InlineData("source-resume.tsv", "output-resume.tsv")]
+        [InlineData("source-resume.docx", "output-resume.docx")]
+        [InlineData("source-financial-sample.xlsx", "output-financial-sample.xlsx")]
         public void ReplaceNonStatic_ValidFilesNonNullMatcher_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
         {
             // Arrange
@@ -236,6 +276,47 @@ namespace TextReplaceAPI.Tests
             var QuickReplace = new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames, preGenerateMatcher: true, caseSensitive: false);
             var matcherActual = QuickReplace.IsMatcherCreated();
             var actual = QuickReplace.Replace(wholeWord: false, caseSensitive: false, preserveCase: false);
+
+            // Assert
+            Assert.True(matcherActual);
+            Assert.True(actual);
+
+            // Compare the generated file to the mock file
+            if (Path.GetExtension(QuickReplace.SourceFiles.First().OutputFileName) == ".xlsx" ||
+                Path.GetExtension(QuickReplace.SourceFiles.First().OutputFileName) == ".docx")
+            {
+                Assert.True(FileComparer.FilesAreEqual_OpenXml(mockOutputName, generatedFileName));
+            }
+            else
+            {
+                Assert.True(FileComparer.FilesAreEqual(mockOutputName, generatedFileName));
+            }
+
+            // Cleanup
+            File.Delete(generatedFileName);
+        }
+
+        [Theory]
+        [InlineData("source-resume.txt", "output-resume.txt")]
+        [InlineData("source-resume.csv", "output-resume.csv")]
+        [InlineData("source-resume.tsv", "output-resume.tsv")]
+        [InlineData("source-resume.docx", "output-resume.docx")]
+        [InlineData("source-financial-sample.xlsx", "output-financial-sample.xlsx")]
+        public async Task ReplaceAsyncNonStatic_ValidFilesNonNullMatcher_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        {
+            // Arrange
+            var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
+            sourceFileName = RelativeSourcesPath + "Normal/" + sourceFileName;
+            var mockOutputName = RelativeMockOutputsPath + "Normal/" + outputFileName;
+            var generatedFileName = RelativeGeneratedFilePath + outputFileName;
+
+            var sourceFileNames = new List<string>() { sourceFileName };
+            var outputFileNames = new List<string>() { generatedFileName };
+
+            // Act
+            var QuickReplace = new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames, preGenerateMatcher: true, caseSensitive: false);
+            var matcherActual = QuickReplace.IsMatcherCreated();
+            var actual = await QuickReplace.ReplaceAsync(wholeWord: false, caseSensitive: false, preserveCase: false);
 
             // Assert
             Assert.True(matcherActual);
@@ -278,6 +359,47 @@ namespace TextReplaceAPI.Tests
 
             // Act
             var actual = QuickReplace.Replace(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false);
+
+            // Assert
+            Assert.True(actual);
+
+            // Compare the generated file to the mock file
+            if (Path.GetExtension(sourceFiles.First().OutputFileName) == ".xlsx" ||
+                Path.GetExtension(sourceFiles.First().OutputFileName) == ".docx")
+            {
+                Assert.True(FileComparer.FilesAreEqual_OpenXml(mockOutputName, generatedFileName));
+            }
+            else
+            {
+                Assert.True(FileComparer.FilesAreEqual(mockOutputName, generatedFileName));
+            }
+
+            // Cleanup
+            File.Delete(generatedFileName);
+        }
+
+        [Theory]
+        [InlineData("source-resume.txt", "output-resume.txt")]
+        [InlineData("source-resume.csv", "output-resume.csv")]
+        [InlineData("source-resume.tsv", "output-resume.tsv")]
+        [InlineData("source-resume.docx", "output-resume.docx")]
+        [InlineData("source-financial-sample.xlsx", "output-financial-sample.xlsx")]
+        public async Task ReplaceAsyncStatic_ValidFiles_ReturnsTrueReplacementsPerformed(string sourceFileName, string outputFileName)
+        {
+            // Arrange
+            var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
+            sourceFileName = RelativeSourcesPath + "Normal/" + sourceFileName;
+            var mockOutputName = RelativeMockOutputsPath + "Normal/" + outputFileName;
+            var generatedFileName = RelativeGeneratedFilePath + outputFileName;
+
+            var sourceFileNames = new List<string>() { sourceFileName };
+            var outputFileNames = new List<string>() { generatedFileName };
+
+            var replacePhrases = QuickReplace.ParseReplacements(replacementsFileName);
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
+
+            // Act
+            var actual = await QuickReplace.ReplaceAsync(replacePhrases, sourceFiles, wholeWord: false, caseSensitive: false, preserveCase: false);
 
             // Assert
             Assert.True(actual);
