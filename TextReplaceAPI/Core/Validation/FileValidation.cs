@@ -53,41 +53,23 @@ namespace TextReplaceAPI.Core.Validation
         }
 
         /// <summary>
-        /// Checks to see if all files in a list are readable
-        /// </summary>
-        /// <param name="filenames"></param>
-        /// <returns>False if the list is empty or if one of the files is not readable</returns>
-        public static bool AreFileNamesValid(List<string> filenames)
-        {
-            if (filenames.Count == 0)
-            {
-                return false;
-            }
-
-            foreach (string filename in filenames)
-            {
-                if (IsInputFileReadable(filename) == false)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        /// <summary>
         /// Checks to see if the replace file is of a supported type
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns>False if the file type is not supported</returns>
         public static bool IsReplaceFileTypeValid(string fileName)
         {
-            string extension = Path.GetExtension(fileName).ToLower();
-            return extension switch
+            if (Path.GetExtension(fileName).Equals(".xlsx", StringComparison.CurrentCultureIgnoreCase))
             {
-                ".csv" or ".tsv" or ".xlsx" or ".txt" or ".text" => true,
-                _ => false
-            };
+                return true;
+            }
+
+            if (IsFileNonBinary(fileName))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -97,27 +79,18 @@ namespace TextReplaceAPI.Core.Validation
         /// <returns>False if the file type is not supported</returns>
         public static bool IsSourceFileTypeValid(string fileName)
         {
-            string extension = Path.GetExtension(fileName).ToLower();
-            return extension switch
+            if (Path.GetExtension(fileName).Equals(".xlsx", StringComparison.CurrentCultureIgnoreCase) ||
+               Path.GetExtension(fileName).Equals(".docx", StringComparison.CurrentCultureIgnoreCase))
             {
-                ".csv" or ".tsv" or ".xlsx" or ".txt" or ".text" or ".docx" => true,
-                _ => false
-            };
-        }
+                return true;
+            }
 
-        /// <summary>
-        /// Checks to see if the output file is of a supported type
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns>False if the file type is not supported</returns>
-        public static bool IsOutputFileTypeValid(string fileName)
-        {
-            string extension = Path.GetExtension(fileName).ToLower();
-            return extension switch
+            if (IsFileNonBinary(fileName))
             {
-                ".csv" or ".tsv" or ".xlsx" or ".txt" or ".text" or ".docx" => true,
-                _ => false
-            };
+                return true;
+            }
+
+            return false;
         }
 
         public static bool IsTextFile(string fileName)
@@ -139,22 +112,46 @@ namespace TextReplaceAPI.Core.Validation
             return false;
         }
 
-        public static bool IsCsvTsvFile(string fileName)
-        {
-            if (Path.GetExtension(fileName).Equals(".csv", StringComparison.CurrentCultureIgnoreCase) ||
-                Path.GetExtension(fileName).Equals(".tsv", StringComparison.CurrentCultureIgnoreCase))
-            {
-                return true;
-            }
-            return false;
-        }
-
         public static bool IsDocxFile(string fileName)
         {
             if (Path.GetExtension(fileName).Equals(".docx", StringComparison.CurrentCultureIgnoreCase))
             {
                 return true;
             }
+            return false;
+        }
+
+        public static bool IsFileNonBinary(string fileName)
+        {
+            return !IsFileBinary(fileName);
+        }
+
+        public static bool IsFileBinary(string fileName)
+        {
+            const int charsToCheck = 8000;
+            const char nulChar = '\0';
+
+            using var streamReader = new StreamReader(fileName);
+
+            for (var i = 0; i < charsToCheck; i++)
+            {
+                if (streamReader.EndOfStream)
+                {
+                    Debug.WriteLine(1);
+                    Debug.WriteLine(i);
+                    return false;
+                }
+
+                var ch = (char)streamReader.Read();
+                if (ch == nulChar)
+                {
+                    Debug.WriteLine(2);
+                    Debug.WriteLine(i);
+                    return true;
+                }
+            }
+
+            Debug.WriteLine(3);
             return false;
         }
     }

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using TextReplaceAPI.Core.AhoCorasick;
+﻿using TextReplaceAPI.Core.AhoCorasick;
 using TextReplaceAPI.Core.Helpers;
 using TextReplaceAPI.Core.Validation;
 using TextReplaceAPI.DataTypes;
@@ -33,6 +32,7 @@ namespace TextReplaceAPI
         /// <param name="replacementsFileName"></param>
         /// <param name="sourceFileNames"></param>
         /// <param name="outputFileNames"></param>
+        /// <param name="validateSrcFiles"></param>
         /// <exception cref="InvalidFileTypeException">
         /// A file type is not supported. See documentation for a list of supported file types.
         /// </exception>
@@ -46,18 +46,17 @@ namespace TextReplaceAPI
         public QuickReplace(
             string replacementsFileName,
             IEnumerable<string> sourceFileNames,
-            IEnumerable<string> outputFileNames)
+            IEnumerable<string> outputFileNames,
+            bool validateSrcFiles = false)
 		{
             _replacePhrases = ParseReplacements(replacementsFileName);
 
-            if (AreSourceFileTypesValid(sourceFileNames) == false)
+            if (validateSrcFiles)
             {
-                throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
-            }
-
-            if (AreOutputFileTypesValid(outputFileNames) == false)
-            {
-                throw new InvalidFileTypeException("Invalid output file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+                if (AreSourceFilesValid(sourceFileNames) == false)
+                {
+                    throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+                }
             }
 
             // zip the source file names and the output file names together and then combine the names into SourceFile objects
@@ -71,6 +70,7 @@ namespace TextReplaceAPI
         /// <param name="replacements"></param>
         /// <param name="sourceFileNames"></param>
         /// <param name="outputFileNames"></param>
+        /// <param name="validateSrcFiles"></param>
         /// <exception cref="InvalidFileTypeException">
         /// A file type is not supported. See documentation for a list of supported file types.
         /// </exception>
@@ -84,18 +84,17 @@ namespace TextReplaceAPI
         public QuickReplace(
             Dictionary<string, string> replacements,
             IEnumerable<string> sourceFileNames,
-            IEnumerable<string> outputFileNames)
+            IEnumerable<string> outputFileNames,
+            bool validateSrcFiles = false)
         {
             _replacePhrases = replacements;
 
-            if (AreSourceFileTypesValid(sourceFileNames) == false)
+            if (validateSrcFiles)
             {
-                throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
-            }
-
-            if (AreOutputFileTypesValid(outputFileNames) == false)
-            {
-                throw new InvalidFileTypeException("Invalid output file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+                if (AreSourceFilesValid(sourceFileNames) == false)
+                {
+                    throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+                }
             }
 
             // zip the source file names and the output file names together and then combine the names into SourceFile objects
@@ -116,6 +115,7 @@ namespace TextReplaceAPI
         /// <param name="outputFileNames"></param>
         /// <param name="preGenerateMatcher"></param>
         /// <param name="caseSensitive"></param>
+        /// <param name="validateSrcFiles"></param>
         /// <exception cref="InvalidFileTypeException">
         /// A file type is not supported. See documentation for a list of supported file types.
         /// </exception>
@@ -131,18 +131,17 @@ namespace TextReplaceAPI
             IEnumerable<string> sourceFileNames,
             IEnumerable<string> outputFileNames,
             bool preGenerateMatcher,
-            bool caseSensitive)
+            bool caseSensitive,
+            bool validateSrcFiles = false)
         {
             _replacePhrases = ParseReplacements(replacementsFileName);
 
-            if (AreSourceFileTypesValid(sourceFileNames) == false)
+            if (validateSrcFiles)
             {
-                throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
-            }
-
-            if (AreOutputFileTypesValid(sourceFileNames) == false)
-            {
-                throw new InvalidFileTypeException("Invalid output file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+                if (AreSourceFilesValid(sourceFileNames) == false)
+                {
+                    throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+                }
             }
 
             // zip the source file names and the output file names together and then combine the names into SourceFile objects
@@ -169,6 +168,7 @@ namespace TextReplaceAPI
         /// <param name="outputFileNames"></param>
         /// <param name="preGenerateMatcher"></param>
         /// <param name="caseSensitive"></param>
+        /// <param name="validateSrcFiles"></param>
         /// <exception cref="InvalidFileTypeException">
         /// A file type is not supported. See documentation for a list of supported file types.
         /// </exception>
@@ -184,18 +184,17 @@ namespace TextReplaceAPI
             IEnumerable<string> sourceFileNames,
             IEnumerable<string> outputFileNames,
             bool preGenerateMatcher,
-            bool caseSensitive)
+            bool caseSensitive,
+            bool validateSrcFiles = false)
         {
             _replacePhrases = replacements;
 
-            if (AreSourceFileTypesValid(sourceFileNames) == false)
+            if (validateSrcFiles)
             {
-                throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
-            }
-
-            if (AreOutputFileTypesValid(sourceFileNames) == false)
-            {
-                throw new InvalidFileTypeException("Invalid output file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+                if (AreSourceFilesValid(sourceFileNames) == false)
+                {
+                    throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+                }
             }
 
             // zip the source file names and the output file names together and then combine the names into SourceFile objects
@@ -422,9 +421,14 @@ namespace TextReplaceAPI
         /// <exception cref="ArgumentException"></exception>
         public static Dictionary<string, string> ParseReplacements(string fileName)
         {
+            if (File.Exists(fileName) == false)
+            {
+                throw new FileNotFoundException("Replacements file does not exist");
+            }
+
             if (FileValidation.IsReplaceFileTypeValid(fileName) == false)
             {
-                throw new InvalidFileTypeException($"File type \"{Path.GetExtension(fileName).ToLower()}\" is not supported as a replacements file.");
+                throw new InvalidFileTypeException("Invalid replacements file type: the only supported file types are .xlsx, and UTF-8 text files");
             }
 
             return ReplacementsHelper.ParseReplacements(fileName);
@@ -441,11 +445,23 @@ namespace TextReplaceAPI
         /// output file names, and -1 for the number of replacements made.
         /// </returns>
         /// <exception cref="ArgumentException">The number of source files does not equal the number of output files.</exception>
-        public static List<SourceFile> ZipSourceFiles(IEnumerable<string> sourceFileNames, IEnumerable<string> outputFileNames)
+        /// <exception cref="InvalidFileTypeException">At least one of the files either does not exist or is not a valid file type.</exception>
+        public static List<SourceFile> ZipSourceFiles(
+            IEnumerable<string> sourceFileNames,
+            IEnumerable<string> outputFileNames,
+            bool validateSrcFiles = false)
         {
             if (sourceFileNames.Count() != outputFileNames.Count())
             {
                 throw new ArgumentException("The number of source files does not equal the number of output files.");
+            }
+
+            if (validateSrcFiles)
+            {
+                if (AreSourceFilesValid(sourceFileNames) == false)
+                {
+                    throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
+                }
             }
 
             // zip the source file names and the output file names together and then combine the names into SourceFile objects
@@ -460,7 +476,7 @@ namespace TextReplaceAPI
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns>True if the file ends in a valid file type.</returns>
-        public static bool IsReplacementFileTypeValid(string fileName)
+        public static bool IsReplacementFileValid(string fileName)
         {
             return FileValidation.IsReplaceFileTypeValid(fileName);
         }
@@ -470,11 +486,11 @@ namespace TextReplaceAPI
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns>True if all files end in valid file types.</returns>
-        public static bool AreSourceFileTypesValid(IEnumerable<string> fileNames)
+        public static bool AreSourceFilesValid(IEnumerable<string> fileNames)
         {
             foreach(var fileName in fileNames)
             {
-                if (IsSourceFileTypeValid(fileName) == false)
+                if (IsSourceFileValid(fileName) == false)
                 {
                     return false;
                 }
@@ -488,37 +504,9 @@ namespace TextReplaceAPI
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns>True if the file ends in a valid file type.</returns>
-        public static bool IsSourceFileTypeValid(string fileName)
+        public static bool IsSourceFileValid(string fileName)
         {
             return FileValidation.IsSourceFileTypeValid(fileName);
-        }
-
-        /// <summary>
-        /// Determines whether an IEnumerable of source file names all end with valid file types.
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns>True if all files end in valid file types.</returns>
-        public static bool AreOutputFileTypesValid(IEnumerable<string> fileNames)
-        {
-            foreach (var fileName in fileNames)
-            {
-                if (IsOutputFileTypeValid(fileName) == false)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Determines whether an output file name ends with a valid file type.
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns>True if the file ends in a valid file type.</returns>
-        public static bool IsOutputFileTypeValid(string fileName)
-        {
-            return FileValidation.IsOutputFileTypeValid(fileName);
         }
 
         /// <summary>
@@ -547,6 +535,10 @@ namespace TextReplaceAPI
             _matcher = null;
         }
 
+        /// <summary>
+        /// Checks to see whether a matcher is pre-generated.
+        /// </summary>
+        /// <returns>Returns true if there is a matcher, false otherwise.</returns>
         public bool IsMatcherCreated()
         {
             return _matcher != null;

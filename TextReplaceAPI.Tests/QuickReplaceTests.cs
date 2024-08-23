@@ -120,19 +120,18 @@ namespace TextReplaceAPI.Tests
         }
 
         [Theory]
-        [InlineData("invalid-filetype.tmp", "source-resume.txt", "output-resume.txt")]
-        [InlineData("replacements-abbreviations.csv", "invalid-filetype.tmp", "source-resume.txt")]
-        [InlineData("replacements-abbreviations.csv", "source-resume.txt", "invalid-filetype.tmp")]
-        public void QuickReplace_InvalidFileType_ThrowsInvalidFileTypeException(string replacementsFileName, string sourceFileName, string outputFileName)
+        [InlineData("invalid-file-type.bin", "Normal/source-resume.txt", "output-resume.txt")]
+        [InlineData("replacements-abbreviations.csv", "Invalid/invalid-file-type.bin", "output-resume.txt")]
+        public void QuickReplace_InvalidSourceFileType_ThrowsInvalidFileTypeException(string replacementsFileName, string sourceFileName, string outputFileName)
         {
             // Arrange
             replacementsFileName = RelativeReplacementsPath + replacementsFileName;
 
-            var sourceFileNames = new List<string>() { sourceFileName };
+            var sourceFileNames = new List<string>() { RelativeSourcesPath + sourceFileName };
             var outputFileNames = new List<string>() { outputFileName };
 
             // Act and Assert
-            Assert.Throws<InvalidFileTypeException>(() => new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames));
+            Assert.Throws<InvalidFileTypeException>(() => new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames, validateSrcFiles: true));
         }
 
         [Fact]
@@ -1269,7 +1268,7 @@ namespace TextReplaceAPI.Tests
         public void ParseReplacements_InvalidFileType_ThrowsInvalidFileTypeException()
         {
             // Arrange
-            var replacementsFileName = RelativeReplacementsPath + "invalid-file-type.tmp";
+            var replacementsFileName = RelativeReplacementsPath + "invalid-file-type.bin";
 
             // Act and Assert
             Assert.Throws<InvalidFileTypeException>(() => QuickReplace.ParseReplacements(replacementsFileName));
@@ -1352,160 +1351,93 @@ namespace TextReplaceAPI.Tests
         }
 
         [Theory]
-        [InlineData("filename.txt")]
-        [InlineData("filename.csv")]
-        [InlineData("filename.tsv")]
-        [InlineData("filename.xlsx")]
-        public void IsReplacementFileTypeValid_ValidFileType_ReturnsTrue(string filename)
+        [InlineData("replacements-abbreviations-pound-delimiter.txt")]
+        [InlineData("replacements-abbreviations.csv")]
+        [InlineData("replacements-abbreviations.tsv")]
+        [InlineData("replacements-abbreviations.xlsx")]
+        public void IsReplacementFileValid_ValidFile_ReturnsTrue(string filename)
         {
             // Act
-            var actual = QuickReplace.IsReplacementFileTypeValid(filename);
+            var actual = QuickReplace.IsReplacementFileValid(RelativeReplacementsPath + filename);
 
             // Assert
             Assert.True(actual);
         }
 
         [Theory]
-        [InlineData("filename.tmp")]
-        [InlineData("filename.docx")]
-        public void IsReplacementFileTypeValid_InvalidFileType_ReturnsFalse(string filename)
+        [InlineData("invalid-file-type.bin")]
+        [InlineData("invalid-file-type.docx")]
+        public void IsReplacementFileValid_InvalidFile_ReturnsFalse(string filename)
         {
             // Act
-            var actual = QuickReplace.IsReplacementFileTypeValid(filename);
+            var actual = QuickReplace.IsReplacementFileValid(RelativeReplacementsPath + "/Invalid" + filename);
 
             // Assert
             Assert.False(actual);
         }
 
         [Fact]
-        public void AreSourceFileTypesValid_ValidFileTypes_ReturnsTrue()
+        public void AreSourceFilesValid_ValidFiles_ReturnsTrue()
         {
             // Arrange
             var sourceFileNames = new List<string>()
             {
-                "filename.txt",
-                "filename.csv",
-                "filename.tsv",
-                "filename.xlsx"
+                RelativeSourcesPath + "Normal/" + "source-resume.txt",
+                RelativeSourcesPath + "Normal/" + "source-resume.csv",
+                RelativeSourcesPath + "Normal/" + "source-resume.tsv",
+                RelativeSourcesPath + "Normal/" + "financial-sample.xlsx"
             };
 
             // Act
-            var actual = QuickReplace.AreSourceFileTypesValid(sourceFileNames);
+            var actual = QuickReplace.AreSourceFilesValid(sourceFileNames);
 
             // Assert
             Assert.True(actual);
         }
 
         [Fact]
-        public void AreSourceFileTypesValid_InvalidFileTypes_ReturnsFalse()
+        public void AreSourceFilesValid_InvalidFiles_ReturnsFalse()
         {
             // Arrange
             var sourceFileNames = new List<string>()
             {
-                "filename.txt",
-                "filename.csv",
-                "invalid-filename.tmp",
-                "filename.tsv",
-                "filename.xlsx"
+                RelativeSourcesPath + "Normal/" + "source-resume.txt",
+                RelativeSourcesPath + "Normal/" + "source-resume.csv",
+                RelativeSourcesPath + "Invalid/" + "invalid-file-type.bin",
+                RelativeSourcesPath + "Normal/" + "source-resume.tsv",
+                RelativeSourcesPath + "Normal/" + "source-financial-sample.xlsx"
             };
 
             // Act
-            var actual = QuickReplace.AreSourceFileTypesValid(sourceFileNames);
+            var actual = QuickReplace.AreSourceFilesValid(sourceFileNames);
 
             // Assert
             Assert.False(actual);
         }
 
         [Theory]
-        [InlineData("filename.txt")]
-        [InlineData("filename.csv")]
-        [InlineData("filename.tsv")]
-        [InlineData("filename.docx")]
-        [InlineData("filename.xlsx")]
-        public void IsSourceFileTypeValid_ValidFileType_ReturnsTrue(string filename)
+        [InlineData("source-resume.txt")]
+        [InlineData("source-resume.csv")]
+        [InlineData("source-resume.tsv")]
+        [InlineData("source-resume.docx")]
+        [InlineData("financial-sample.xlsx")]
+        public void IsSourceFileValid_ValidFile_ReturnsTrue(string filename)
         {
             // Act
-            var actual = QuickReplace.IsSourceFileTypeValid(filename);
+            var actual = QuickReplace.IsSourceFileValid(RelativeSourcesPath + "Normal/" + filename);
 
             // Assert
             Assert.True(actual);
         }
 
         [Fact]
-        public void IsSourceFileTypeValid_InvalidFileType_ReturnsFalse()
+        public void IsSourceFileValid_InvalidFile_ReturnsFalse()
         {
             // Arrange
-            var filename = "invalid-file-type.tmp";
+            var filename = "invalid-file-type.bin";
 
             // Act
-            var actual = QuickReplace.IsSourceFileTypeValid(filename);
-
-            // Assert
-            Assert.False(actual);
-        }
-
-        [Fact]
-        public void AreOutputFileTypesValid_ValidFileTypes_ReturnsTrue()
-        {
-            // Arrange
-            var outputFileNames = new List<string>()
-            {
-                "filename.txt",
-                "filename.csv",
-                "filename.tsv",
-                "filename.xlsx"
-            };
-
-            // Act
-            var actual = QuickReplace.AreOutputFileTypesValid(outputFileNames);
-
-            // Assert
-            Assert.True(actual);
-        }
-
-        [Fact]
-        public void AreOutputFileTypesValid_InvalidFileTypes_ReturnsFalse()
-        {
-            // Arrange
-            var outputFileNames = new List<string>()
-            {
-                "filename.txt",
-                "filename.csv",
-                "invalid-filename.tmp",
-                "filename.tsv",
-                "filename.xlsx"
-            };
-
-            // Act
-            var actual = QuickReplace.AreOutputFileTypesValid(outputFileNames);
-
-            // Assert
-            Assert.False(actual);
-        }
-
-        [Theory]
-        [InlineData("filename.txt")]
-        [InlineData("filename.csv")]
-        [InlineData("filename.tsv")]
-        [InlineData("filename.docx")]
-        [InlineData("filename.xlsx")]
-        public void IsOutputFileTypeValid_ValidFileType_ReturnsTrue(string filename)
-        {
-            // Act
-            var actual = QuickReplace.IsOutputFileTypeValid(filename);
-
-            // Assert
-            Assert.True(actual);
-        }
-
-        [Fact]
-        public void IsOutputFileTypeValid_InvalidFileType_ReturnsFalse()
-        {
-            // Arrange
-            var filename = "invalid-file-type.tmp";
-
-            // Act
-            var actual = QuickReplace.IsOutputFileTypeValid(filename);
+            var actual = QuickReplace.IsSourceFileValid(RelativeSourcesPath + "Invalid/" + filename);
 
             // Assert
             Assert.False(actual);
