@@ -59,17 +59,12 @@ namespace TextReplaceAPI.Core.Validation
         /// <returns>False if the file type is not supported</returns>
         public static bool IsReplaceFileTypeValid(string fileName)
         {
-            if (Path.GetExtension(fileName).Equals(".xlsx", StringComparison.CurrentCultureIgnoreCase))
+            string extension = Path.GetExtension(fileName).ToLower();
+            return extension switch
             {
-                return true;
-            }
-
-            if (IsFileNonBinary(fileName))
-            {
-                return true;
-            }
-
-            return false;
+                ".csv" or ".tsv" or ".xlsx" or ".txt" or ".text" => true,
+                _ => false
+            };
         }
 
         /// <summary>
@@ -128,7 +123,7 @@ namespace TextReplaceAPI.Core.Validation
 
         public static bool IsFileBinary(string fileName)
         {
-            const int charsToCheck = 8000;
+            const int charsToCheck = 4000;
             const char nulChar = '\0';
 
             using var streamReader = new StreamReader(fileName);
@@ -137,21 +132,16 @@ namespace TextReplaceAPI.Core.Validation
             {
                 if (streamReader.EndOfStream)
                 {
-                    Debug.WriteLine(1);
-                    Debug.WriteLine(i);
                     return false;
                 }
 
                 var ch = (char)streamReader.Read();
                 if (ch == nulChar)
                 {
-                    Debug.WriteLine(2);
-                    Debug.WriteLine(i);
                     return true;
                 }
             }
 
-            Debug.WriteLine(3);
             return false;
         }
     }

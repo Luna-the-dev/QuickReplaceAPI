@@ -120,7 +120,7 @@ namespace TextReplaceAPI.Tests
         }
 
         [Theory]
-        [InlineData("invalid-file-type.bin", "Normal/source-resume.txt", "output-resume.txt")]
+        [InlineData("Invalid/invalid-file-type.bin", "Normal/source-resume.txt", "output-resume.txt")]
         [InlineData("replacements-abbreviations.csv", "Invalid/invalid-file-type.bin", "output-resume.txt")]
         public void QuickReplace_InvalidSourceFileType_ThrowsInvalidFileTypeException(string replacementsFileName, string sourceFileName, string outputFileName)
         {
@@ -1268,7 +1268,7 @@ namespace TextReplaceAPI.Tests
         public void ParseReplacements_InvalidFileType_ThrowsInvalidFileTypeException()
         {
             // Arrange
-            var replacementsFileName = RelativeReplacementsPath + "invalid-file-type.bin";
+            var replacementsFileName = RelativeReplacementsPath + "Invalid/" + "invalid-file-type.bin";
 
             // Act and Assert
             Assert.Throws<InvalidFileTypeException>(() => QuickReplace.ParseReplacements(replacementsFileName));

@@ -196,31 +196,8 @@ namespace TextReplaceAPI.Core.Helpers
                 throw new DirectoryNotFoundException("Destination file directory could not be parsed.");
             }
 
-            // source file is plaintext
-            if (FileValidation.IsFileNonBinary(src))
-            {
-                // output file type:
-                if (FileValidation.IsExcelFile(dest))
-                {
-                    throw new NotSupportedException($"Replace operation not supported for file types \"{Path.GetExtension(src)}\" to \"{Path.GetExtension(src)}\"");
-                }
-
-                int numOfReplacements;
-                if (FileValidation.IsDocxFile(dest))
-                {
-                    destFile.Directory.Create();
-                    numOfReplacements = ReadFromTextCsvTsvWriteToDocx(replacePhrases, src, dest, matcher, styling, wholeWord, preserveCase);
-                    return numOfReplacements;
-                }
-
-                // output file is plaintext
-                destFile.Directory.Create();
-                numOfReplacements = ReadFromTextCsvTsvWriteToTextCsvTsv(replacePhrases, src, dest, matcher, wholeWord, preserveCase);
-                return numOfReplacements;
-            }
-
             // source file is docx
-            else if (FileValidation.IsDocxFile(src))
+            if (FileValidation.IsDocxFile(src))
             {
                 // output file type:
                 if (FileValidation.IsExcelFile(dest))
@@ -248,6 +225,29 @@ namespace TextReplaceAPI.Core.Helpers
             {
                 destFile.Directory.Create();
                 int numOfReplacements = ReadFromExcelWriteToExcel(replacePhrases, src, dest, matcher, styling, wholeWord, preserveCase);
+                return numOfReplacements;
+            }
+
+            // source file is plaintext
+            else if (FileValidation.IsFileNonBinary(src))
+            {
+                // output file type:
+                if (FileValidation.IsExcelFile(dest))
+                {
+                    throw new NotSupportedException($"Replace operation not supported for file types \"{Path.GetExtension(src)}\" to \"{Path.GetExtension(src)}\"");
+                }
+
+                int numOfReplacements;
+                if (FileValidation.IsDocxFile(dest))
+                {
+                    destFile.Directory.Create();
+                    numOfReplacements = ReadFromTextCsvTsvWriteToDocx(replacePhrases, src, dest, matcher, styling, wholeWord, preserveCase);
+                    return numOfReplacements;
+                }
+
+                // output file is plaintext
+                destFile.Directory.Create();
+                numOfReplacements = ReadFromTextCsvTsvWriteToTextCsvTsv(replacePhrases, src, dest, matcher, wholeWord, preserveCase);
                 return numOfReplacements;
             }
 
