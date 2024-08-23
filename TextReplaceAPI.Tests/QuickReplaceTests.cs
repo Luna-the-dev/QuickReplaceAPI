@@ -12,7 +12,7 @@ namespace TextReplaceAPI.Tests
         private static readonly string RelativeGeneratedFilePath = "../../GeneratedTestFiles/QuickReplaceTests/";
 
         [Fact]
-        public void QuickReplace_ConstructorReplacementsFromDict_ReplacePhrasesAndSourceFilesInitialized()
+        public void QuickReplaceConstructor_ReplacementsFromDict_ReplacePhrasesAndSourceFilesInitialized()
         {
             // Arrange
             var replacePhrases = new Dictionary<string, string>
@@ -63,7 +63,7 @@ namespace TextReplaceAPI.Tests
         [InlineData("replacements-abbreviations.xlsx")]
         [InlineData("replacements-abbreviations-pound-delimiter.txt")]
         [InlineData("replacements-abbreviations-semicolon-delimiter.txt")]
-        public void QuickReplace_ConstructorReplacementsFromFileName_ReplacePhrasesAndSourceFilesInitialized(string replacementsFileName)
+        public void QuickReplaceConstructor_ReplacementsFromFileName_ReplacePhrasesAndSourceFilesInitialized(string replacementsFileName)
         {
             // Arrange
             replacementsFileName = RelativeReplacementsPath + replacementsFileName;
@@ -104,7 +104,88 @@ namespace TextReplaceAPI.Tests
         }
 
         [Fact]
-        public void QuickReplace_ConstructorGenerateMatcher_AhoCorasickMatcherInitialized()
+        public void QuickReplaceConstructor_ReplacementsFromNonExistentFileName_ThrowsFileNotFoundException()
+        {
+            // Arrange
+            var replacementsFileName = RelativeReplacementsPath + "file-doesnt-exist.tmp";
+
+            var sourceFileNames = new List<string>()
+            {
+                "source-file-name.txt",
+                "source-file-name.csv",
+                "source-file-name.tsv",
+                "source-file-name.docx",
+                "source-file-name.xlsx"
+            };
+
+            var outputFileNames = new List<string>()
+            {
+                "output-file-name.txt",
+                "output-file-name.csv",
+                "output-file-name.tsv",
+                "output-file-name.docx",
+                "output-file-name.xlsx"
+            };
+
+            // Act & Assert
+            Assert.Throws<FileNotFoundException>(() => new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames));
+        }
+
+        [Theory]
+        [InlineData("invalid-file-type.bin")]
+        [InlineData("invalid-file-type.docx")]
+        public void QuickReplaceConstructor_ReplacementsFromNonExistentFileName_ThrowsInvalidFileTypeException(string filename)
+        {
+            // Arrange
+            var replacementsFileName = RelativeReplacementsPath + "Invalid/" + filename;
+
+            var sourceFileNames = new List<string>()
+            {
+                "source-file-name.txt",
+                "source-file-name.csv",
+                "source-file-name.tsv",
+                "source-file-name.docx",
+                "source-file-name.xlsx"
+            };
+
+            var outputFileNames = new List<string>()
+            {
+                "output-file-name.txt",
+                "output-file-name.csv",
+                "output-file-name.tsv",
+                "output-file-name.docx",
+                "output-file-name.xlsx"
+            };
+
+            // Act & Assert
+            Assert.Throws<InvalidFileTypeException>(() => new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames));
+        }
+
+        [Fact]
+        public void QuickReplaceConstructor_FromDictAndGenerateMatcher_AhoCorasickMatcherInitialized()
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var sourceFileNames = new List<string>() { "source-file-name.txt" };
+            var outputFileNames = new List<string>() { "output-file-name.txt" };
+
+            // Act
+            var QuickReplace = new QuickReplace(replacePhrases, sourceFileNames, outputFileNames, preGenerateMatcher: true, caseSensitive: true);
+
+            // Assert
+            Assert.True(QuickReplace.IsMatcherCreated());
+        }
+
+        [Fact]
+        public void QuickReplaceConstructor_FromFilenameAndGenerateMatcher_AhoCorasickMatcherInitialized()
         {
             // Arrange
             var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
@@ -117,6 +198,202 @@ namespace TextReplaceAPI.Tests
 
             // Assert
             Assert.True(QuickReplace.IsMatcherCreated());
+        }
+
+        [Fact]
+        public void QuickReplaceConstructor_ReplacementsFromDictValidateSourceFiles_ThrowsFileNotFoundException()
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var sourceFileNames = new List<string>()
+            {
+                "source-file-name.txt",
+                "source-file-name.csv",
+                "source-file-name.tsv",
+                "source-file-name.docx",
+                "source-file-name.xlsx"
+            };
+
+            var outputFileNames = new List<string>()
+            {
+                "output-file-name.txt",
+                "output-file-name.csv",
+                "output-file-name.tsv",
+                "output-file-name.docx",
+                "output-file-name.xlsx"
+            };
+
+            // Act & Assert
+            Assert.Throws<FileNotFoundException>(() => new QuickReplace(replacePhrases, sourceFileNames, outputFileNames, validateSrcFiles: true));
+        }
+
+        [Fact]
+        public void QuickReplaceConstructor_ReplacementsFromDictValidateSourceFiles_ThrowsInvalidFileTypeException()
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var sourceFileNames = new List<string>()
+            {
+                RelativeSourcesPath + "Normal/" + "source-resume.txt",
+                RelativeSourcesPath + "Normal/" + "source-resume.csv",
+                RelativeSourcesPath + "Invalid/" + "invalid-file-type.bin",
+                RelativeSourcesPath + "Normal/" + "source-resume.docx",
+                RelativeSourcesPath + "Normal/" + "source-financial-sample.xlsx"
+            };
+
+            var outputFileNames = new List<string>()
+            {
+                "output-file-name.txt",
+                "output-file-name.csv",
+                "output-file-name.tsv",
+                "output-file-name.docx",
+                "output-file-name.xlsx"
+            };
+
+            // Act & Assert
+            Assert.Throws<InvalidFileTypeException>(() => new QuickReplace(replacePhrases, sourceFileNames, outputFileNames, validateSrcFiles: true));
+        }
+
+        [Fact]
+        public void QuickReplaceConstructor_ReplacementsFromFileNameValidateSourceFiles_ThrowsFileNotFoundException()
+        {
+            // Arrange
+            var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
+
+            var sourceFileNames = new List<string>()
+            {
+                "source-file-name.txt",
+                "source-file-name.csv",
+                "source-file-name.tsv",
+                "source-file-name.docx",
+                "source-file-name.xlsx"
+            };
+
+            var outputFileNames = new List<string>()
+            {
+                "output-file-name.txt",
+                "output-file-name.csv",
+                "output-file-name.tsv",
+                "output-file-name.docx",
+                "output-file-name.xlsx"
+            };
+
+            // Act & Assert
+            Assert.Throws<FileNotFoundException>(() => new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames, validateSrcFiles: true));
+        }
+
+        [Fact]
+        public void QuickReplaceConstructor_ReplacementsFromFileNameValidateSourceFiles_ThrowsInvalidFileTypeException()
+        {
+            // Arrange
+            var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
+
+            var sourceFileNames = new List<string>()
+            {
+                RelativeSourcesPath + "Normal/" + "source-resume.txt",
+                RelativeSourcesPath + "Normal/" + "source-resume.csv",
+                RelativeSourcesPath + "Invalid/" + "invalid-file-type.bin",
+                RelativeSourcesPath + "Normal/" + "source-resume.docx",
+                RelativeSourcesPath + "Normal/" + "source-financial-sample.xlsx"
+            };
+
+            var outputFileNames = new List<string>()
+            {
+                "output-file-name.txt",
+                "output-file-name.csv",
+                "output-file-name.tsv",
+                "output-file-name.docx",
+                "output-file-name.xlsx"
+            };
+
+            // Act & Assert
+            Assert.Throws<InvalidFileTypeException>(() => new QuickReplace(replacementsFileName, sourceFileNames, outputFileNames, validateSrcFiles: true));
+        }
+
+        [Fact]
+        public void QuickReplaceConstructor_FromDictAndGenerateMatcherValidateSourceFiles_ThrowsFileNotFoundException()
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var sourceFileNames = new List<string>() { "source-file-name.txt" };
+            var outputFileNames = new List<string>() { "output-file-name.txt" };
+
+            // Act & Assert
+            Assert.Throws<FileNotFoundException>(() => new QuickReplace(
+                replacePhrases, sourceFileNames, outputFileNames, preGenerateMatcher: true, caseSensitive: true, validateSrcFiles: true));
+        }
+
+        [Fact]
+        public void QuickReplaceConstructor_FromDictAndGenerateMatcherValidateSourceFiles_ThrowsInvalidFileTypeException()
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var sourceFileNames = new List<string>() { RelativeSourcesPath + "Invalid/" + "invalid-file-type.bin" };
+            var outputFileNames = new List<string>() { "output-file-name.txt" };
+
+            // Act & Assert
+            Assert.Throws<InvalidFileTypeException>(() => new QuickReplace(
+                replacePhrases, sourceFileNames, outputFileNames, preGenerateMatcher: true, caseSensitive: true, validateSrcFiles: true));
+        }
+
+        [Fact]
+        public void QuickReplaceConstructor_FromFilenameAndGenerateMatcherValidateSourceFiles_ThrowsFileNotFoundException()
+        {
+            // Arrange
+            var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
+
+            var sourceFileNames = new List<string>() { "source-file-name.txt" };
+            var outputFileNames = new List<string>() { "output-file-name.txt" };
+
+            // Act & Assert
+            Assert.Throws<FileNotFoundException>(() => new QuickReplace(
+                replacementsFileName, sourceFileNames, outputFileNames, preGenerateMatcher: true, caseSensitive: true, validateSrcFiles: true));
+        }
+
+        [Fact]
+        public void QuickReplaceConstructor_FromFilenameAndGenerateMatcherValidateSourceFiles_ThrowsInvalidFileTypeException()
+        {
+            // Arrange
+            var replacementsFileName = RelativeReplacementsPath + "replacements-abbreviations.csv";
+
+            var sourceFileNames = new List<string>() { RelativeSourcesPath + "Invalid/" + "invalid-file-type.bin" };
+            var outputFileNames = new List<string>() { "output-file-name.txt" };
+
+            // Act & Assert
+            Assert.Throws<InvalidFileTypeException>(() => new QuickReplace(
+                replacementsFileName, sourceFileNames, outputFileNames, preGenerateMatcher: true, caseSensitive: true, validateSrcFiles: true));
         }
 
         [Theory]
@@ -1350,6 +1627,58 @@ namespace TextReplaceAPI.Tests
             Assert.Throws<ArgumentException>(() => QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames));
         }
 
+        [Fact]
+        public void ZipSourceFiles_NonExistentSourceFiles_ThrowsFileNotFoundException()
+        {
+            // Arrange
+            var sourceFileNames = new List<string>()
+            {
+                "source-file-name.txt",
+                "source-file-name.csv",
+                "source-file-name.tsv",
+                "source-file-name.docx",
+                "source-file-name.xlsx"
+            };
+
+            var outputFileNames = new List<string>()
+            {
+                "output-file-name.txt",
+                "output-file-name.csv",
+                "output-file-name.tsv",
+                "output-file-name.docx",
+                "output-file-name.xlsx"
+            };
+
+            // Act & Assert
+            Assert.Throws<FileNotFoundException>(() => QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames, validateSrcFiles: true));
+        }
+
+        [Fact]
+        public void ZipSourceFiles_InvalidSourceFileType_ThrowsInvalidFileTypeException()
+        {
+            // Arrange
+            var sourceFileNames = new List<string>()
+            {
+                RelativeSourcesPath + "Normal/" + "source-resume.txt",
+                RelativeSourcesPath + "Normal/" + "source-resume.csv",
+                RelativeSourcesPath + "Invalid/" + "invalid-file-type.bin",
+                RelativeSourcesPath + "Normal/" + "source-resume.docx",
+                RelativeSourcesPath + "Normal/" + "source-financial-sample.xlsx"
+            };
+
+            var outputFileNames = new List<string>()
+            {
+                "output-file-name.txt",
+                "output-file-name.csv",
+                "output-file-name.tsv",
+                "output-file-name.docx",
+                "output-file-name.xlsx"
+            };
+
+            // Act & Assert
+            Assert.Throws<InvalidFileTypeException>(() => QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames, validateSrcFiles: true));
+        }
+
         [Theory]
         [InlineData("replacements-abbreviations-pound-delimiter.txt")]
         [InlineData("replacements-abbreviations.csv")]
@@ -1415,6 +1744,23 @@ namespace TextReplaceAPI.Tests
             Assert.False(actual);
         }
 
+        [Fact]
+        public void AreSourceFilesValid_NonExistentFile_ThrowsFileNotFoundException()
+        {
+            // Arrange
+            var sourceFileNames = new List<string>()
+            {
+                RelativeSourcesPath + "Normal/" + "source-resume.txt",
+                RelativeSourcesPath + "Normal/" + "source-resume.csv",
+                RelativeSourcesPath + "file-that-doesnt-exist.tmp",
+                RelativeSourcesPath + "Normal/" + "source-resume.tsv",
+                RelativeSourcesPath + "Normal/" + "source-financial-sample.xlsx"
+            };
+
+            // Act & Assert
+            Assert.Throws<FileNotFoundException>(() => QuickReplace.AreSourceFilesValid(sourceFileNames));
+        }
+
         [Theory]
         [InlineData("source-resume.txt")]
         [InlineData("source-resume.csv")]
@@ -1434,13 +1780,23 @@ namespace TextReplaceAPI.Tests
         public void IsSourceFileValid_InvalidFile_ReturnsFalse()
         {
             // Arrange
-            var filename = "invalid-file-type.bin";
+            var filename = RelativeSourcesPath + "Invalid/" + "invalid-file-type.bin";
 
             // Act
-            var actual = QuickReplace.IsSourceFileValid(RelativeSourcesPath + "Invalid/" + filename);
+            var actual = QuickReplace.IsSourceFileValid(filename);
 
             // Assert
             Assert.False(actual);
+        }
+
+        [Fact]
+        public void IsSourceFileValid_NonExistentFile_ThrowsFileNotFoundException()
+        {
+            // Arrange
+            var filename = "file-that-doesnt-exist.tmp";
+
+            // Act & Assert
+            Assert.Throws<FileNotFoundException>(() => QuickReplace.IsSourceFileValid(filename));
         }
 
         [Fact]

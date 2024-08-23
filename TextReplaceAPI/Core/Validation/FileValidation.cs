@@ -75,7 +75,7 @@ namespace TextReplaceAPI.Core.Validation
         public static bool IsSourceFileTypeValid(string fileName)
         {
             if (Path.GetExtension(fileName).Equals(".xlsx", StringComparison.CurrentCultureIgnoreCase) ||
-               Path.GetExtension(fileName).Equals(".docx", StringComparison.CurrentCultureIgnoreCase))
+                    Path.GetExtension(fileName).Equals(".docx", StringComparison.CurrentCultureIgnoreCase))
             {
                 return true;
             }
