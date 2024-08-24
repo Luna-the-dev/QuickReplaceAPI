@@ -75,7 +75,7 @@ namespace TextReplaceAPI.Core.Validation
         public static bool IsSourceFileTypeValid(string fileName)
         {
             if (Path.GetExtension(fileName).Equals(".xlsx", StringComparison.CurrentCultureIgnoreCase) ||
-                    Path.GetExtension(fileName).Equals(".docx", StringComparison.CurrentCultureIgnoreCase))
+                Path.GetExtension(fileName).Equals(".docx", StringComparison.CurrentCultureIgnoreCase))
             {
                 return true;
             }
@@ -86,6 +86,34 @@ namespace TextReplaceAPI.Core.Validation
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Checks to see if the file conversion from source to output is valid
+        /// </summary>
+        /// <param name="sourceFile"></param>
+        /// <param name="outputFile"></param>
+        /// <returns>Returns false if the file conversion is not valid</returns>
+        public static bool IsFileConversionValid(string sourceFile, string outputFile)
+        {
+            var sourceExtension = Path.GetExtension(sourceFile);
+            var outputExtension = Path.GetExtension(outputFile);
+
+            // source is excel, output is not
+            if (Path.GetExtension(sourceFile).Equals(".xlsx", StringComparison.CurrentCultureIgnoreCase) &&
+                !Path.GetExtension(outputFile).Equals(".xlsx", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return false;
+            }
+
+            // output is excel, source is not
+            if (!Path.GetExtension(sourceFile).Equals(".xlsx", StringComparison.CurrentCultureIgnoreCase) &&
+                Path.GetExtension(outputFile).Equals(".xlsx", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public static bool IsTextFile(string fileName)

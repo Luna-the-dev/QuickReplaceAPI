@@ -53,7 +53,7 @@ namespace TextReplaceAPI
 
             if (validateSrcFiles)
             {
-                if (AreSourceFilesValid(sourceFileNames) == false)
+                if (AreFilesValid(sourceFileNames, outputFileNames) == false)
                 {
                     throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
                 }
@@ -91,7 +91,7 @@ namespace TextReplaceAPI
 
             if (validateSrcFiles)
             {
-                if (AreSourceFilesValid(sourceFileNames) == false)
+                if (AreFilesValid(sourceFileNames, outputFileNames) == false)
                 {
                     throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
                 }
@@ -138,7 +138,7 @@ namespace TextReplaceAPI
 
             if (validateSrcFiles)
             {
-                if (AreSourceFilesValid(sourceFileNames) == false)
+                if (AreFilesValid(sourceFileNames, outputFileNames) == false)
                 {
                     throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
                 }
@@ -191,7 +191,7 @@ namespace TextReplaceAPI
 
             if (validateSrcFiles)
             {
-                if (AreSourceFilesValid(sourceFileNames) == false)
+                if (AreFilesValid(sourceFileNames, outputFileNames) == false)
                 {
                     throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
                 }
@@ -458,7 +458,7 @@ namespace TextReplaceAPI
 
             if (validateSrcFiles)
             {
-                if (AreSourceFilesValid(sourceFileNames) == false)
+                if (AreFilesValid(sourceFileNames, outputFileNames) == false)
                 {
                     throw new InvalidFileTypeException("Invalid source file: the only supported file types are .csv, .tsv, .xlsx., .txt, and .text");
                 }
@@ -482,15 +482,23 @@ namespace TextReplaceAPI
         }
 
         /// <summary>
-        /// Determines whether an IEnumerable of source file names all end with valid file types.
+        /// Determines whether an IEnumerable of source files are valid and that the
+        /// type conversion to their corresponding outputs file are valid.
         /// </summary>
-        /// <param name="fileName"></param>
+        /// <param name="sourceFiles"></param>
+        /// <param name="outputFiles"></param>
         /// <returns>True if all files end in valid file types.</returns>
-        public static bool AreSourceFilesValid(IEnumerable<string> fileNames)
+        public static bool AreFilesValid(IEnumerable<string> sourceFiles, IEnumerable<string> outputFiles)
         {
-            foreach(var fileName in fileNames)
+            var sourceFilesCount = sourceFiles.Count();
+            if (sourceFilesCount != outputFiles.Count())
             {
-                if (IsSourceFileValid(fileName) == false)
+                return false;
+            }
+
+            foreach (var files in sourceFiles.Zip(outputFiles, (source, output) => (source, output)))
+            {
+                if (AreFilesValid(files.source, files.output) == false)
                 {
                     return false;
                 }
@@ -500,13 +508,55 @@ namespace TextReplaceAPI
         }
 
         /// <summary>
-        /// Determines whether a source file name ends with a valid file type.
+        /// Determines whether an IEnumerable of source files are valid and that the
+        /// type conversion to their corresponding outputs file are valid.
         /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns>True if the file ends in a valid file type.</returns>
-        public static bool IsSourceFileValid(string fileName)
+        /// <param name="files"></param>
+        /// <returns>True if all files end in valid file types.</returns>
+        public static bool AreFilesValid(IEnumerable<SourceFile> files)
         {
-            return FileValidation.IsSourceFileTypeValid(fileName);
+            foreach (var file in files)
+            {
+                if (AreFilesValid(file.SourceFileName, file.OutputFileName) == false)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Determines whether a source file is valid and that the
+        /// type conversion to its corresponding output file is valid.
+        /// </summary>
+        /// <param name="sourceFile"></param>
+        /// <param name="outputFile"></param>
+        /// <returns>True if the file ends in a valid file type.</returns>
+        public static bool AreFilesValid(string sourceFile, string outputFile)
+        {
+            if (FileValidation.IsSourceFileTypeValid(sourceFile) &&
+                FileValidation.IsFileConversionValid(sourceFile, outputFile))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether a source file is valid and that the
+        /// type conversion to its corresponding output file is valid.
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns>True if the file ends in a valid file type.</returns>
+        public static bool AreFilesValid(SourceFile file)
+        {
+            if (FileValidation.IsSourceFileTypeValid(file.SourceFileName) &&
+                FileValidation.IsFileConversionValid(file.SourceFileName, file.OutputFileName))
+            {
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
