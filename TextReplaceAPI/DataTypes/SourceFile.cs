@@ -9,7 +9,7 @@
         public SourceFile(
             string sourceFileName,
             string outputFileName,
-            int numOfReplacements)
+            int numOfReplacements = -1)
         {
             SourceFileName = sourceFileName;
             OutputFileName = outputFileName;

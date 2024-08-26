@@ -521,7 +521,7 @@ namespace TextReplaceAPI
             // zip the source file names and the output file names together and then combine the names into SourceFile objects
             return sourceFileNames
                 .Zip(outputFileNames, (s, o) => new { SourceFileName = s, OutputFIleName = o })
-                .Select(x => new SourceFile(x.SourceFileName, x.OutputFIleName, -1))
+                .Select(x => new SourceFile(x.SourceFileName, x.OutputFIleName))
                 .ToList();
         }
 

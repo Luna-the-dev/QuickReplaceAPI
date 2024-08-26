@@ -2082,6 +2082,34 @@ namespace TextReplaceAPI.Tests
         }
 
         [Fact]
+        public void AreFilesValid_InequalFileCountList_ReturnsFalse()
+        {
+            // Arrange
+            var sourceFileNames = new List<string>()
+            {
+                RelativeSourcesPath + "Normal/" + "source-resume.txt",
+                RelativeSourcesPath + "Normal/" + "source-resume.csv",
+                RelativeSourcesPath + "Normal/" + "source-resume.tsv",
+                RelativeSourcesPath + "Normal/" + "source-resume.docx",
+                RelativeSourcesPath + "Normal/" + "source-financial-sample.xlsx"
+            };
+
+            var outputFileNames = new List<string>()
+            {
+                "output-file-name.txt",
+                "output-file-name.csv",
+                "output-file-name.tsv",
+                "output-file-name.docx",
+            };
+
+            // Act
+            var actual = QuickReplace.AreFilesValid(sourceFileNames, outputFileNames);
+
+            // Assert
+            Assert.False(actual);
+        }
+
+        [Fact]
         public void AreFilesValid_InvalidFilesList_ReturnsFalse()
         {
             // Arrange
@@ -2228,6 +2256,199 @@ namespace TextReplaceAPI.Tests
 
             // Act & Assert
             Assert.Throws<FileNotFoundException>(() => QuickReplace.AreFilesValid(sourceFile, outputFile));
+        }
+
+        [Fact]
+        public void AreFilesValid_SourceFilesValidFilesList_ReturnsTrue()
+        {
+            // Arrange
+            var sourceFileNames = new List<string>()
+            {
+                RelativeSourcesPath + "Normal/" + "source-resume.txt",
+                RelativeSourcesPath + "Normal/" + "source-resume.csv",
+                RelativeSourcesPath + "Normal/" + "source-resume.tsv",
+                RelativeSourcesPath + "Normal/" + "source-resume.docx",
+                RelativeSourcesPath + "Normal/" + "financial-sample.xlsx"
+            };
+
+            var outputFileNames = new List<string>()
+            {
+                "output-file-name.txt",
+                "output-file-name.csv",
+                "output-file-name.tsv",
+                "output-file-name.docx",
+                "output-file-name.xlsx"
+            };
+
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
+
+            // Act
+            var actual = QuickReplace.AreFilesValid(sourceFiles);
+
+            // Assert
+            Assert.True(actual);
+        }
+
+        [Fact]
+        public void AreFilesValid_SourceFilesInvalidFilesList_ReturnsFalse()
+        {
+            // Arrange
+            var sourceFileNames = new List<string>()
+            {
+                RelativeSourcesPath + "Normal/" + "source-resume.txt",
+                RelativeSourcesPath + "Normal/" + "source-resume.csv",
+                RelativeSourcesPath + "Invalid/" + "invalid-file-type.bin",
+                RelativeSourcesPath + "Normal/" + "source-resume.tsv",
+                RelativeSourcesPath + "Normal/" + "source-financial-sample.xlsx"
+            };
+
+            var outputFileNames = new List<string>()
+            {
+                "output-file-name.txt",
+                "output-file-name.csv",
+                "output-file-name.tsv",
+                "output-file-name.docx",
+                "output-file-name.xlsx"
+            };
+
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
+
+            // Act
+            var actual = QuickReplace.AreFilesValid(sourceFiles);
+
+            // Assert
+            Assert.False(actual);
+        }
+
+        [Theory]
+        [InlineData("source-resume.txt", "output-file-name.xlsx")]
+        [InlineData("source-resume.docx", "output-file-name.xlsx")]
+        [InlineData("source-financial-sample.xlsx", "output-file-name.txt")]
+        [InlineData("source-financial-sample.xlsx", "output-file-name.docx")]
+        public void AreFilesValid_SourceFilesInvalidFileConversionList_ReturnsFalse(string invalidSourceFile, string invalidOutputFile)
+        {
+            // Arrange
+            var sourceFileNames = new List<string>()
+            {
+                RelativeSourcesPath + "Normal/" + "source-resume.txt",
+                RelativeSourcesPath + "Normal/" + "source-resume.csv",
+                RelativeSourcesPath + "Normal/" + invalidSourceFile,
+                RelativeSourcesPath + "Normal/" + "source-resume.tsv",
+                RelativeSourcesPath + "Normal/" + "source-financial-sample.xlsx"
+            };
+
+            var outputFileNames = new List<string>()
+            {
+                "output-file-name.txt",
+                "output-file-name.csv",
+                invalidOutputFile,
+                "output-file-name.docx",
+                "output-file-name.xlsx"
+            };
+
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
+
+            // Act
+            var actual = QuickReplace.AreFilesValid(sourceFiles);
+
+            // Assert
+            Assert.False(actual);
+        }
+
+        [Fact]
+        public void AreFilesValid_SourceFilesNonExistentFileList_ThrowsFileNotFoundException()
+        {
+            // Arrange
+            var sourceFileNames = new List<string>()
+            {
+                RelativeSourcesPath + "Normal/" + "source-resume.txt",
+                RelativeSourcesPath + "Normal/" + "source-resume.csv",
+                RelativeSourcesPath + "file-that-doesnt-exist.tmp",
+                RelativeSourcesPath + "Normal/" + "source-resume.tsv",
+                RelativeSourcesPath + "Normal/" + "source-financial-sample.xlsx"
+            };
+
+            var outputFileNames = new List<string>()
+            {
+                "output-file-name.txt",
+                "output-file-name.csv",
+                "output-file-name.tsv",
+                "output-file-name.docx",
+                "output-file-name.xlsx"
+            };
+
+            var sourceFiles = QuickReplace.ZipSourceFiles(sourceFileNames, outputFileNames);
+
+            // Act & Assert
+            Assert.Throws<FileNotFoundException>(() => QuickReplace.AreFilesValid(sourceFiles));
+        }
+
+        [Theory]
+        [InlineData("source-resume.txt", "output-file-name.txt")]
+        [InlineData("source-resume.csv", "output-file-name.docx")]
+        [InlineData("source-resume.docx", "output-file-name.csv")]
+        [InlineData("source-resume.docx", "output-file-name.docx")]
+        [InlineData("financial-sample.xlsx", "output-file-name.xlsx")]
+        public void AreFilesValid_SourceFilesValidFileString_ReturnsTrue(string sourceFilename, string outputFilename)
+        {
+            // Arrange
+            sourceFilename = RelativeSourcesPath + "Normal/" + sourceFilename;
+
+            var sourceFile = new SourceFile(sourceFilename, outputFilename);
+
+            // Act
+            var actual = QuickReplace.AreFilesValid(sourceFile);
+
+            // Assert
+            Assert.True(actual);
+        }
+
+        [Fact]
+        public void AreFilesValid_SourceFilesInvalidFileString_ReturnsFalse()
+        {
+            // Arrange
+            var sourceFilename = RelativeSourcesPath + "Invalid/" + "invalid-file-type.bin";
+            var outputFilename = "output-file-name.txt";
+
+            var sourceFile = new SourceFile(sourceFilename, outputFilename);
+
+            // Act
+            var actual = QuickReplace.AreFilesValid(sourceFile);
+
+            // Assert
+            Assert.False(actual);
+        }
+
+        [Theory]
+        [InlineData("source-resume.txt", "output-file-name.xlsx")]
+        [InlineData("source-resume.docx", "output-file-name.xlsx")]
+        [InlineData("source-financial-sample.xlsx", "output-file-name.txt")]
+        [InlineData("source-financial-sample.xlsx", "output-file-name.docx")]
+        public void AreFilesValid_SourceFilesInvalidFileConversionString_ReturnsFalse(string sourceFilename, string outputFilename)
+        {
+            // Arrange
+            sourceFilename = RelativeSourcesPath + "Normal/" + sourceFilename;
+
+            var sourceFile = new SourceFile(sourceFilename, outputFilename);
+
+            // Act
+            var actual = QuickReplace.AreFilesValid(sourceFile);
+
+            // Assert
+            Assert.False(actual);
+        }
+
+        [Fact]
+        public void AreFilesValid_SourceFilesNonExistentFileString_ThrowsFileNotFoundException()
+        {
+            // Arrange
+            var sourceFilename = "file-that-doesnt-exist.tmp";
+            var outputFilename = "output-file-name.txt";
+
+            var sourceFile = new SourceFile(sourceFilename, outputFilename);
+
+            // Act & Assert
+            Assert.Throws<FileNotFoundException>(() => QuickReplace.AreFilesValid(sourceFile));
         }
 
         [Fact]
