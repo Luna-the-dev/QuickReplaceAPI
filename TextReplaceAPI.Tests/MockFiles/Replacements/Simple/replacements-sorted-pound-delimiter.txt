@@ -1,0 +1,5 @@
+basic-text#basic-text1
+text with whitespace#text with whitespace 1
+text,with,commas#text,with,commas,1
+"text,with"",commas""and""quotes,"""#"text,with"",commas""and""quotes,""1"
+text;with;semicolons#text;with;semicolons1

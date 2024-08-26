@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using TextReplaceAPI.DataTypes;
 using TextReplaceAPI.Exceptions;
 using TextReplaceAPI.Tests.Common;
@@ -1579,6 +1580,352 @@ namespace TextReplaceAPI.Tests
 
             // Act and Assert
             Assert.Throws<InvalidOperationException>(() => QuickReplace.ParseReplacements(replacementsFileName));
+        }
+
+        [Theory]
+        [InlineData("replacements.csv")]
+        [InlineData("replacements.tsv")]
+        [InlineData("replacements.xlsx")]
+        public void SaveReplacePhrasesToFile_ValidFile_ReplacementsSaved(string filename)
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var sourceFileNames = new List<string>() { "source-file-name.txt" };
+            var outputFileNames = new List<string>() { "output-file-name.txt" };
+
+            var QuickReplace = new QuickReplace(replacePhrases, sourceFileNames, outputFileNames);
+
+            var generatedFileName = RelativeGeneratedFilePath + filename;
+            var mockFileName = RelativeReplacementsPath + "Simple/" + filename;
+
+            // Act
+            QuickReplace.SaveReplacePhrasesToFile(generatedFileName);
+
+            // Assert
+            if (Path.GetExtension(generatedFileName) == ".xlsx")
+            {
+                Assert.True(FileComparer.FilesAreEqual_OpenXml(mockFileName, generatedFileName));
+            }
+            else
+            {
+                Assert.True(FileComparer.FilesAreEqual(mockFileName, generatedFileName));
+            }
+        }
+
+        [Theory]
+        [InlineData("replacements.txt", "")]
+        [InlineData("replacements-pound-delimiter.txt", "#")]
+        [InlineData("replacements-semicolon-delimiter.txt", ";")]
+        public void SaveReplacePhrasesToFile_TextFile_ReplacementsSaved(string filename, string delimiter)
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var sourceFileNames = new List<string>() { "source-file-name.txt" };
+            var outputFileNames = new List<string>() { "output-file-name.txt" };
+
+            var QuickReplace = new QuickReplace(replacePhrases, sourceFileNames, outputFileNames);
+
+            var generatedFileName = RelativeGeneratedFilePath + filename;
+            var mockFileName = RelativeReplacementsPath + "Simple/" + filename;
+
+            // Act
+            QuickReplace.SaveReplacePhrasesToFile(generatedFileName, delimiter: delimiter);
+
+            // Assert
+            Assert.True(FileComparer.FilesAreEqual(mockFileName, generatedFileName));
+        }
+
+        [Theory]
+        [InlineData("replacements.csv")]
+        [InlineData("replacements.tsv")]
+        [InlineData("replacements.xlsx")]
+        public void SaveReplacePhrasesToFileStatic_ValidFile_ReplacementsSaved(string filename)
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var generatedFileName = RelativeGeneratedFilePath + filename;
+            var mockFileName = RelativeReplacementsPath + "Simple/" + filename;
+
+            // Act
+            QuickReplace.SaveReplacePhrasesToFile(replacePhrases, generatedFileName);
+
+            // Assert
+            if (Path.GetExtension(generatedFileName) == ".xlsx")
+            {
+                Assert.True(FileComparer.FilesAreEqual_OpenXml(mockFileName, generatedFileName));
+            }
+            else
+            {
+                Assert.True(FileComparer.FilesAreEqual(mockFileName, generatedFileName));
+            }
+        }
+
+        [Theory]
+        [InlineData("replacements.txt", "")]
+        [InlineData("replacements-pound-delimiter.txt", "#")]
+        [InlineData("replacements-semicolon-delimiter.txt", ";")]
+        public void SaveReplacePhrasesToFileStatic_TextFile_ReplacementsSaved(string filename, string delimiter)
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var generatedFileName = RelativeGeneratedFilePath + filename;
+            var mockFileName = RelativeReplacementsPath + "Simple/" + filename;
+
+            // Act
+            QuickReplace.SaveReplacePhrasesToFile(replacePhrases, generatedFileName, delimiter: delimiter);
+
+            // Assert
+            Assert.True(FileComparer.FilesAreEqual(mockFileName, generatedFileName));
+        }
+
+        [Theory]
+        [InlineData("replacements-sorted.csv")]
+        [InlineData("replacements-sorted.tsv")]
+        [InlineData("replacements-sorted.xlsx")]
+        public void SaveReplacePhrasesToFile_ValidFileSortedPhrases_ReplacementsSaved(string filename)
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var sourceFileNames = new List<string>() { "source-file-name.txt" };
+            var outputFileNames = new List<string>() { "output-file-name.txt" };
+
+            var QuickReplace = new QuickReplace(replacePhrases, sourceFileNames, outputFileNames);
+
+            var generatedFileName = RelativeGeneratedFilePath + filename;
+            var mockFileName = RelativeReplacementsPath + "Simple/" + filename;
+
+            // Act
+            QuickReplace.SaveReplacePhrasesToFile(generatedFileName, shouldSort: true);
+
+            // Assert
+            if (Path.GetExtension(generatedFileName) == ".xlsx")
+            {
+                Assert.True(FileComparer.FilesAreEqual_OpenXml(mockFileName, generatedFileName));
+            }
+            else
+            {
+                Assert.True(FileComparer.FilesAreEqual(mockFileName, generatedFileName));
+            }
+        }
+
+        [Theory]
+        [InlineData("replacements-sorted.txt", "")]
+        [InlineData("replacements-sorted-pound-delimiter.txt", "#")]
+        [InlineData("replacements-sorted-semicolon-delimiter.txt", ";")]
+        public void SaveReplacePhrasesToFile_TextFileSortedPhrases_ReplacementsSaved(string filename, string delimiter)
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var sourceFileNames = new List<string>() { "source-file-name.txt" };
+            var outputFileNames = new List<string>() { "output-file-name.txt" };
+
+            var QuickReplace = new QuickReplace(replacePhrases, sourceFileNames, outputFileNames);
+
+            var generatedFileName = RelativeGeneratedFilePath + filename;
+            var mockFileName = RelativeReplacementsPath + "Simple/" + filename;
+
+            // Act
+            QuickReplace.SaveReplacePhrasesToFile(generatedFileName, delimiter: delimiter, shouldSort: true);
+
+            // Assert
+            Assert.True(FileComparer.FilesAreEqual(mockFileName, generatedFileName));
+        }
+
+        [Theory]
+        [InlineData("replacements-sorted.csv")]
+        [InlineData("replacements-sorted.tsv")]
+        [InlineData("replacements-sorted.xlsx")]
+        public void SaveReplacePhrasesToFileStatic_ValidFileSortedPhrases_ReplacementsSaved(string filename)
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var generatedFileName = RelativeGeneratedFilePath + filename;
+            var mockFileName = RelativeReplacementsPath + "Simple/" + filename;
+
+            // Act
+            QuickReplace.SaveReplacePhrasesToFile(replacePhrases, generatedFileName, shouldSort: true);
+
+            // Assert
+            if (Path.GetExtension(generatedFileName) == ".xlsx")
+            {
+                Assert.True(FileComparer.FilesAreEqual_OpenXml(mockFileName, generatedFileName));
+            }
+            else
+            {
+                Assert.True(FileComparer.FilesAreEqual(mockFileName, generatedFileName));
+            }
+        }
+
+        [Theory]
+        [InlineData("replacements-sorted.txt", "")]
+        [InlineData("replacements-sorted-pound-delimiter.txt", "#")]
+        [InlineData("replacements-sorted-semicolon-delimiter.txt", ";")]
+        public void SaveReplacePhrasesToFileStatic_TextFileSortedPhrases_ReplacementsSaved(string filename, string delimiter)
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var generatedFileName = RelativeGeneratedFilePath + filename;
+            var mockFileName = RelativeReplacementsPath + "Simple/" + filename;
+
+            // Act
+            QuickReplace.SaveReplacePhrasesToFile(replacePhrases, generatedFileName, delimiter: delimiter, shouldSort: true);
+
+            // Assert
+            Assert.True(FileComparer.FilesAreEqual(mockFileName, generatedFileName));
+        }
+
+        [Fact]
+        public void SaveReplacePhrasesToFile_InvalidFile_ThrowsNotSupportedException()
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var sourceFileNames = new List<string>() { "source-file-name.txt" };
+            var outputFileNames = new List<string>() { "output-file-name.txt" };
+
+            var QuickReplace = new QuickReplace(replacePhrases, sourceFileNames, outputFileNames);
+
+            var generatedFileName = RelativeGeneratedFilePath + "invalid-file-type.bin";
+            var mockFileName = RelativeReplacementsPath + "Simple/" + "replacements.csv";
+
+            // Act & Assert
+            Assert.Throws<NotSupportedException>(() => QuickReplace.SaveReplacePhrasesToFile(generatedFileName));
+        }
+
+        [Fact]
+        public void SaveReplacePhrasesToFileStatic_InvalidFile_ThrowsNotSupportedException()
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var generatedFileName = RelativeGeneratedFilePath + "invalid-file-type.bin";
+            var mockFileName = RelativeReplacementsPath + "Simple/" + "replacements.csv";
+
+            // Act & Assert
+            Assert.Throws<NotSupportedException>(() => QuickReplace.SaveReplacePhrasesToFile(replacePhrases, generatedFileName));
+        }
+
+        [Fact]
+        public void SaveReplacePhrasesToFile_InvalidDelimiter_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var sourceFileNames = new List<string>() { "source-file-name.txt" };
+            var outputFileNames = new List<string>() { "output-file-name.txt" };
+
+            var QuickReplace = new QuickReplace(replacePhrases, sourceFileNames, outputFileNames);
+
+            var generatedFileName = RelativeGeneratedFilePath + "replacements.txt";
+            var mockFileName = RelativeReplacementsPath + "Simple/" + "replacements.csv";
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => QuickReplace.SaveReplacePhrasesToFile(generatedFileName, delimiter: "\n"));
+        }
+
+        [Fact]
+        public void SaveReplacePhrasesToFileStatic_InvalidDelimiter_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var replacePhrases = new Dictionary<string, string>
+            {
+                {"basic-text", "basic-text1"},
+                {"text with whitespace", "text with whitespace 1"},
+                {"text,with,commas", "text,with,commas,1"},
+                {"text,with\",commas\"and\"quotes,\"", "text,with\",commas\"and\"quotes,\"1"},
+                {"text;with;semicolons", "text;with;semicolons1"}
+            };
+
+            var generatedFileName = RelativeGeneratedFilePath + "replacements.txt";
+            var mockFileName = RelativeReplacementsPath + "Simple/" + "replacements.csv";
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => QuickReplace.SaveReplacePhrasesToFile(replacePhrases, generatedFileName, delimiter: "\n"));
         }
 
         [Fact]

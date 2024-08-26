@@ -435,6 +435,60 @@ namespace TextReplaceAPI
         }
 
         /// <summary>
+        /// Saves the ReplacePhrases dict to the file system, performing a sort if requested.
+        /// Supported file types are: .csv, .tsv, .xlsx. and .txt
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="shouldSort"></param>
+        /// <param name="delimiter"></param>
+        /// <exception cref="NotSupportedException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        public void SaveReplacePhrasesToFile(
+            string fileName,
+            bool shouldSort = false,
+            string delimiter = "")
+        {
+            // if a delimiter was not supplied for a text file, default to a comma
+            if (FileValidation.IsTextFile(fileName) && delimiter == "")
+            {
+                delimiter = ",";
+            }
+
+            ReplacementsHelper.SavePhrasesToFile(ReplacePhrases, fileName, shouldSort, delimiter);
+        }
+
+        /// <summary>
+        /// Saves a dict of replacement phrases to the file system, performing a sort if requested.
+        /// Supported file types are: .csv, .tsv, .xlsx. and .txt
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="replacePhrases"></param>
+        /// <param name="shouldSort"></param>
+        /// <param name="delimiter"></param>
+        /// <exception cref="NotSupportedException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        public static void SaveReplacePhrasesToFile(
+            Dictionary<string, string> replacePhrases,
+            string fileName,
+            bool shouldSort = false,
+            string delimiter = "")
+        {
+            // if a delimiter was not supplied for a text file, default to a comma
+            if (FileValidation.IsTextFile(fileName) && delimiter == "")
+            {
+                delimiter = ",";
+            }
+
+            ReplacementsHelper.SavePhrasesToFile(replacePhrases, fileName, shouldSort, delimiter);
+        }
+
+        /// <summary>
         /// Zips an IEnumberable of source file names and an IEnumerable of output file names together
         /// an IEnumerable of SourceFile objects
         /// </summary>
