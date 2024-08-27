@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextReplaceAPI", "TextRepla
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextReplaceAPI.Tests", "TextReplaceAPI.Tests\TextReplaceAPI.Tests.csproj", "{2383E4B6-BC86-48BE-8439-63FBC1914180}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextReplaceAPI.Benchmarks", "TextReplaceAPI.Benchmarks\TextReplaceAPI.Benchmarks.csproj", "{F6D065D1-970B-4081-9D8C-EA801C412B39}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextReplaceAPI.Benchmarks", "TextReplaceAPI.Benchmarks\TextReplaceAPI.Benchmarks.csproj", "{F6D065D1-970B-4081-9D8C-EA801C412B39}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,12 +15,12 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{31B96331-1CE5-439A-9A68-66482C953D2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{31B96331-1CE5-439A-9A68-66482C953D2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31B96331-1CE5-439A-9A68-66482C953D2B}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{31B96331-1CE5-439A-9A68-66482C953D2B}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{31B96331-1CE5-439A-9A68-66482C953D2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31B96331-1CE5-439A-9A68-66482C953D2B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2383E4B6-BC86-48BE-8439-63FBC1914180}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2383E4B6-BC86-48BE-8439-63FBC1914180}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2383E4B6-BC86-48BE-8439-63FBC1914180}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{2383E4B6-BC86-48BE-8439-63FBC1914180}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{2383E4B6-BC86-48BE-8439-63FBC1914180}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2383E4B6-BC86-48BE-8439-63FBC1914180}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F6D065D1-970B-4081-9D8C-EA801C412B39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

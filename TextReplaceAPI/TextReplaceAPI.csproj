@@ -10,15 +10,39 @@
     <Company>QuickReplace</Company>
     <Product>QuickReplace</Product>
     <Title>QuickReplace - Find and Replace Made Fast and Easy</Title>
-    <Copyright>The Library that allows you to perform thousands of Find and Replaces on Document, Excel, and Plaintext files with one line of code.</Copyright>
+    <Copyright>https://www.quickreplace.io/</Copyright>
     <PackageProjectUrl>https://www.quickreplace.io/</PackageProjectUrl>
-    <PackageIcon>icon 128.png</PackageIcon>
+    <PackageIcon>QuickReplace.png</PackageIcon>
+    <PackageTags>find;replace;find and replace;text replace;document;excel;docx;xlsx</PackageTags>
+    <PackageOutputPath>bin/Package/</PackageOutputPath>
+    <Description>The Library that allows you to perform thousands of Find and Replaces on Document, Excel, and Plaintext files with one line of code.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.102.3" />
     <PackageReference Include="CsvHelper" Version="33.0.1" />
     <PackageReference Include="ExcelDataReader" Version="3.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="NuGet Assets\QuickReplace.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
