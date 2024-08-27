@@ -22,6 +22,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="NuGet Assets\**" />
+    <EmbeddedResource Remove="NuGet Assets\**" />
+    <None Remove="NuGet Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\NuGet Assets\QuickReplace.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
@@ -36,10 +50,6 @@
 
   <ItemGroup>
     <None Update="LICENSE.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="NuGet Assets\QuickReplace.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
