@@ -1,0 +1,1 @@
+﻿[Licensing Info](https://www.quickreplace.io/legal)
