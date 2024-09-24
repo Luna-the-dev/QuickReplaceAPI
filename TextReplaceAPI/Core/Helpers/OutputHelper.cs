@@ -6,7 +6,6 @@ using TextReplaceAPI.Core.AhoCorasick;
 using TextReplaceAPI.Core.Validation;
 using TextReplaceAPI.DataTypes;
 using TextReplaceAPI.Exceptions;
-using System.Diagnostics;
 
 namespace TextReplaceAPI.Core.Helpers
 {
@@ -734,7 +733,6 @@ namespace TextReplaceAPI.Core.Helpers
 
         static private Wordprocessing.Run TraverseRunSiblings(Wordprocessing.Run run, int distance)
         {
-            Debug.WriteLine(run.InnerText + " " + distance);
             if (distance <= 0)
             {
                 return run;
@@ -742,7 +740,6 @@ namespace TextReplaceAPI.Core.Helpers
             var nextRun = run.NextSibling<Wordprocessing.Run>();
             if (nextRun == null)
             {
-                Debug.WriteLine("peepee");
                 return run;
             }
             return TraverseRunSiblings(nextRun, distance - 1);
