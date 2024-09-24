@@ -82,6 +82,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
         /// <param name="wholeWord"></param>
         /// <param name="preserveCase"></param>
         /// <param name="numOfMatches"></param>
+        /// <param name="newRunsToOldRuns"></param>
         /// <returns>List of new runs beloning to the paragraph that contain the text replacements.</returns>
         public static List<Wordprocessing.Run> GenerateDocxRuns(
             Wordprocessing.Paragraph paragraph,
@@ -90,10 +91,12 @@ namespace TextReplaceAPI.Core.AhoCorasick
             Styling replaceStyling,
             bool wholeWord,
             bool preserveCase,
-            out int numOfMatches)
+            out int numOfMatches,
+            out List<int> newRunsToOldRuns)
         {
             var newRuns = new List<Wordprocessing.Run>();
             numOfMatches = 0;
+            newRunsToOldRuns = new List<int>();
 
             string paragraphText = "";
             var runs = paragraph.Descendants<Wordprocessing.Run>().ToList();
@@ -162,6 +165,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
                         beforeReplaceRunText.Space = SpaceProcessingModeValues.Preserve;
                         beforeReplaceRun.AppendChild(beforeReplaceRunText);
                         newRuns.Add(beforeReplaceRun);
+                        newRunsToOldRuns.Add(i);
 
                         // move the run ptr forward the length of this run
                         runPtr += lengthBeforeReplacement;
@@ -185,6 +189,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
                     };
                     replaceRun.AppendChild(replaceRunText);
                     newRuns.Add(replaceRun);
+                    newRunsToOldRuns.Add(i);
 
                     // move the runPtr forward the length of the text before a replacement is made
                     // since we're not performing the replacement on the paragraphText, just creating a new run
@@ -219,6 +224,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
                 newRunText.Space = SpaceProcessingModeValues.Preserve;
                 newRun.AppendChild(newRunText);
                 newRuns.Add(newRun);
+                newRunsToOldRuns.Add(i);
 
                 // move the subrun pointer forward the length of this run
                 runPtr += lengthBeforeNextRun;
@@ -237,6 +243,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
         /// <param name="wholeWord"></param>
         /// <param name="preserveCase"></param>
         /// <param name="numOfMatches"></param>
+        /// <param name="newRunsToOldRuns"></param>
         /// <returns>List of new runs beloning to the paragraph that contain the text replacements.</returns>
         public static List<Wordprocessing.Run> GenerateDocxRunsOriginalStyling(
             Wordprocessing.Paragraph paragraph,
@@ -244,10 +251,12 @@ namespace TextReplaceAPI.Core.AhoCorasick
             AhoCorasickStringSearcher matcher,
             bool wholeWord,
             bool preserveCase,
-            out int numOfMatches)
+            out int numOfMatches,
+            out List<int> newRunsToOldRuns)
         {
             var newRuns = new List<Wordprocessing.Run>();
             numOfMatches = 0;
+            newRunsToOldRuns = new List<int>();
 
             string paragraphText = "";
             var runs = paragraph.Descendants<Wordprocessing.Run>().ToList();
@@ -320,6 +329,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
                     };
                     replaceRun.AppendChild(replaceRunText);
                     newRuns.Add(replaceRun);
+                    newRunsToOldRuns.Add(i);
 
                     // move the runPtr forward the length of the text before a replacement is made
                     // since we're not performing the replacement on the paragraphText, just creating a new run
@@ -356,6 +366,7 @@ namespace TextReplaceAPI.Core.AhoCorasick
                 };
                 newRun.AppendChild(newRunText);
                 newRuns.Add(newRun);
+                newRunsToOldRuns.Add(i);
 
                 // move the subrun pointer forward the length of this run
                 runPtr += lengthBeforeNextRun;
