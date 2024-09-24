@@ -49,7 +49,9 @@ namespace TextReplaceAPI.Core.AhoCorasick
                 numOfMatches += 1;
 
                 string replacement = (preserveCase) ?
-                    SetMatchCase(replacePhrases[matches[i].Text], char.IsUpper(updatedLine[matches[i].Position + offset])) :
+                    SetMatchCase(
+                        updatedLine.Substring(matches[i].Position + offset, matches[i].Text.Length),
+                        replacePhrases[matches[i].Text]) :
                     replacePhrases[matches[i].Text];
 
                 updatedLine = updatedLine.Remove(matches[i].Position + offset, matches[i].Text.Length)
@@ -181,7 +183,9 @@ namespace TextReplaceAPI.Core.AhoCorasick
                     replaceRun.Append(newReplaceRunProps);
                     // preserve the original case of the word that is being replaced if that option is set
                     string replacement = (preserveCase) ?
-                        SetMatchCase(replacePhrases[matches[matchIndex].Text], char.IsUpper(paragraphText[matches[matchIndex].Position])) :
+                        SetMatchCase(
+                            paragraphText.Substring(matches[matchIndex].Position, matches[matchIndex].Text.Length),
+                            replacePhrases[matches[matchIndex].Text]) :
                         replacePhrases[matches[matchIndex].Text];
                     var replaceRunText = new Wordprocessing.Text(replacement)
                     {
@@ -321,7 +325,9 @@ namespace TextReplaceAPI.Core.AhoCorasick
                     string beforeReplacement = (lengthBeforeReplacement > 0) ? paragraphText.Substring(runPtr, lengthBeforeReplacement) : string.Empty;
                     // preserve the original case of the word that is being replaced if that option is set
                     string replacement = (preserveCase) ?
-                        SetMatchCase(replacePhrases[matches[matchIndex].Text], char.IsUpper(paragraphText[matches[matchIndex].Position])) :
+                        SetMatchCase(
+                            paragraphText.Substring(matches[matchIndex].Position, matches[matchIndex].Text.Length),
+                            replacePhrases[matches[matchIndex].Text]) :
                         replacePhrases[matches[matchIndex].Text];
                     var replaceRunText = new Wordprocessing.Text(beforeReplacement + replacement)
                     {
@@ -446,7 +452,9 @@ namespace TextReplaceAPI.Core.AhoCorasick
                 replaceRun.Append(replaceRunProps);
                 // preserve the original case of the word that is being replaced if that option is set
                 string replacement = (preserveCase) ?
-                    SetMatchCase(replacePhrases[matches[i].Text], char.IsUpper(text[matches[i].Position])) :
+                    SetMatchCase(
+                        text.Substring(matches[i].Position, matches[i].Text.Length),
+                        replacePhrases[matches[i].Text]) :
                     replacePhrases[matches[i].Text];
                 var replaceRunText = new Wordprocessing.Text(replacement)
                 {
@@ -588,7 +596,9 @@ namespace TextReplaceAPI.Core.AhoCorasick
                     replaceRun.Append(newReplaceRunProps);
                     // preserve the original case of the word that is being replaced if that option is set
                     string replacement = (preserveCase) ?
-                        SetMatchCase(replacePhrases[matches[matchIndex].Text], char.IsUpper(cellText[matches[matchIndex].Position])) :
+                        SetMatchCase(
+                            cellText.Substring(matches[matchIndex].Position, matches[matchIndex].Text.Length),
+                            replacePhrases[matches[matchIndex].Text]) :
                         replacePhrases[matches[matchIndex].Text];
                     var replaceRunText = new Spreadsheet.Text(replacement)
                     {
@@ -731,7 +741,9 @@ namespace TextReplaceAPI.Core.AhoCorasick
                     string beforeReplacement = (lengthBeforeReplacement > 0) ? cellText.Substring(runPtr, lengthBeforeReplacement) : string.Empty;
                     // preserve the original case of the word that is being replaced if that option is set
                     string replacement = (preserveCase) ?
-                        SetMatchCase(replacePhrases[matches[matchIndex].Text], char.IsUpper(cellText[matches[matchIndex].Position])) :
+                        SetMatchCase(
+                            cellText.Substring(matches[matchIndex].Position, matches[matchIndex].Text.Length),
+                            replacePhrases[matches[matchIndex].Text]) :
                         replacePhrases[matches[matchIndex].Text];
                     var replaceRunText = new Spreadsheet.Text(beforeReplacement + replacement)
                     {
@@ -810,21 +822,73 @@ namespace TextReplaceAPI.Core.AhoCorasick
         }
 
         /// <summary>
-        /// Sets the case of the first letter of a string based off of a bool
+        /// Matches the casing of str2 to str1. Matches full caps, full lowercase, or the first letter casing of str1.
         /// </summary>
-        /// <param name="match"></param>
-        /// <param name="toUppercase"></param>
-        /// <returns>The original string with the new case</returns>
-        private static string SetMatchCase(string match, bool toUppercase)
+        /// <param name="str1"></param>
+        /// <param name="str2"></param>
+        /// <returns>Returns str2 with the casing of str1</returns>
+        private static string SetMatchCase(string str1, string str2)
         {
-            if (match == string.Empty)
+            if (str1 == string.Empty || str2 == string.Empty)
             {
                 return string.Empty;
             }
 
-            return (toUppercase) ?
-                char.ToUpper(match[0]) + match.Substring(1) :
-                char.ToLower(match[0]) + match.Substring(1);
+            if (IsAllUpper(str1))
+            {
+                return str2.ToUpper();
+            }
+
+            if (IsAllLower(str1))
+            {
+                return str2.ToLower();
+            }
+
+            if (char.IsUpper(str1[0]))
+            {
+                return char.ToUpper(str2[0]) + str2.Substring(1);
+            }
+
+            if (char.IsLower(str1[0]))
+            {
+                return char.ToLower(str2[0]) + str2.Substring(1);
+            }
+
+            return str2;
+        }
+
+        /// <summary>
+        /// Checks if the given string is in all uppercase
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns>Returns true if it is all uppercase, false otherwise</returns>
+        private static bool IsAllUpper(string str)
+        {
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (Char.IsUpper(str[i]) == false)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Checks if the given string is in all lowercase
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns>Returns true if it is all lowercase, false otherwise</returns>
+        private static bool IsAllLower(string str)
+        {
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (Char.IsLower(str[i]) == false)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>
