@@ -54,7 +54,8 @@ namespace TextReplaceAPI.Core.Helpers
             bool caseSensitive,
             bool preserveCase,
             bool throwExceptions,
-            Styling? styling = null)
+            Styling? styling = null,
+            int? numOfThreads = null)
         {
             if (sourceFiles.Any() == false)
             {
@@ -71,7 +72,7 @@ namespace TextReplaceAPI.Core.Helpers
             matcher.CreateFailureFunction();
 
             // returns true if no errors occurred. catches exceptions if throwExceptions = false
-            return WriteReplacementsToAllFiles(replacePhrases, sourceFiles, matcher, wholeWord, preserveCase, throwExceptions, styling);
+            return WriteReplacementsToAllFiles(replacePhrases, sourceFiles, matcher, wholeWord, preserveCase, throwExceptions, styling, numOfThreads);
         }
 
         /// <summary>
@@ -103,7 +104,8 @@ namespace TextReplaceAPI.Core.Helpers
             bool wholeWord,
             bool preserveCase,
             bool throwExceptions,
-            Styling? styling = null)
+            Styling? styling = null,
+            int? numOfThreads = null)
         {
             if (sourceFiles.Any() == false)
             {
@@ -111,7 +113,7 @@ namespace TextReplaceAPI.Core.Helpers
             }
 
             // returns true if no errors occurred. catches exceptions if throwExceptions = false
-            return WriteReplacementsToAllFiles(replacePhrases, sourceFiles, matcher, wholeWord, preserveCase, throwExceptions, styling);
+            return WriteReplacementsToAllFiles(replacePhrases, sourceFiles, matcher, wholeWord, preserveCase, throwExceptions, styling, numOfThreads);
         }
 
         /// <summary>
@@ -124,8 +126,57 @@ namespace TextReplaceAPI.Core.Helpers
         /// <param name="preserveCase"></param>
         /// <param name="throwExceptions"></param>
         /// <param name="styling"></param>
-        /// <returns></returns>
+        /// <param name="numOfThreads"></param>
+        /// <returns>True if all files were written successfully, false if at least one file failed.</returns>
         private static bool WriteReplacementsToAllFiles(
+            Dictionary<string, string> replacePhrases,
+            IEnumerable<SourceFile> sourceFiles,
+            AhoCorasickStringSearcher matcher,
+            bool wholeWord,
+            bool preserveCase,
+            bool throwExceptions,
+            Styling? styling = null,
+            int? numOfThreads = null)
+        {
+            // if numOfThreads is less than 1, make it equal to negative 1 so that
+            // Parallel.ForEach interprets it as uncapped
+            if (numOfThreads < 1)
+            {
+                numOfThreads = -1;
+            }
+
+            // if numOfThreads is 1 or caller didnt supply a number of threads, then
+            // iterate through all files on one thread
+            if (numOfThreads == 1 || numOfThreads == null)
+            {
+                return IterateThroughAllFiles(replacePhrases, sourceFiles, matcher, wholeWord, preserveCase, throwExceptions, styling);
+            }
+
+            // if running on more than one thread, check to make sure that there are no duplicate
+            // source files or output files to avoid conflicts
+            var sfNames = sourceFiles.Select(file => file.SourceFileName);
+            var ofNames = sourceFiles.Select(file => file.OutputFileName);
+            if (numOfThreads > 1 &&
+                (sfNames.Count() != sfNames.Distinct().Count() || ofNames.Count() != ofNames.Distinct().Count()))
+            {
+                throw new ArgumentException("There cannot be duplicate source or output files when running QuickReplace on multiple threads.");
+            }
+
+            return IterateThroughAllFilesAsync(replacePhrases, sourceFiles, matcher, wholeWord, preserveCase, throwExceptions, (int)numOfThreads, styling);
+        }
+
+        /// <summary>
+        /// Attempts to perform the replacements on all source files and write it to the associated destination files.
+        /// </summary>
+        /// <param name="replacePhrases"></param>
+        /// <param name="sourceFiles"></param>
+        /// <param name="matcher"></param>
+        /// <param name="wholeWord"></param>
+        /// <param name="preserveCase"></param>
+        /// <param name="throwExceptions"></param>
+        /// <param name="styling"></param>
+        /// <returns>True if all files were written successfully, false if at least one file failed.</returns>
+        private static bool IterateThroughAllFiles(
             Dictionary<string, string> replacePhrases,
             IEnumerable<SourceFile> sourceFiles,
             AhoCorasickStringSearcher matcher,
@@ -160,6 +211,64 @@ namespace TextReplaceAPI.Core.Helpers
 
                 file.NumOfReplacements = numOfReplacements;
             }
+
+            return didEverythingSucceed;
+        }
+
+        /// <summary>
+        /// Attempts to perform the replacements on all source files and write it to the associated destination files.
+        /// </summary>
+        /// <param name="replacePhrases"></param>
+        /// <param name="sourceFiles"></param>
+        /// <param name="matcher"></param>
+        /// <param name="wholeWord"></param>
+        /// <param name="preserveCase"></param>
+        /// <param name="throwExceptions"></param>
+        /// <param name="styling"></param>
+        /// <returns>True if all files were written successfully, false if at least one file failed.</returns>
+        private static bool IterateThroughAllFilesAsync(
+            Dictionary<string, string> replacePhrases,
+            IEnumerable<SourceFile> sourceFiles,
+            AhoCorasickStringSearcher matcher,
+            bool wholeWord,
+            bool preserveCase,
+            bool throwExceptions,
+            int numOfThreads,
+            Styling? styling = null)
+        {
+            if (throwExceptions)
+            {
+                // do the search on each file
+                Parallel.ForEach(
+                    sourceFiles,
+                    new ParallelOptions { MaxDegreeOfParallelism = numOfThreads },
+                    file =>
+                {
+                    file.NumOfReplacements = WriteReplacementsToFile(
+                        replacePhrases, file.SourceFileName, file.OutputFileName, matcher, wholeWord, preserveCase, styling);
+                });
+                return true;
+            }
+
+            // do the search on each file
+            bool didEverythingSucceed = true;
+            Parallel.ForEach(
+                sourceFiles,
+                new ParallelOptions { MaxDegreeOfParallelism = numOfThreads },
+                file =>
+            {
+                int numOfReplacements = TryWriteReplacementsToFile(
+                    replacePhrases, file.SourceFileName, file.OutputFileName, matcher, wholeWord, preserveCase, styling);
+
+                if (numOfReplacements == -1)
+                {
+                    didEverythingSucceed = false;
+                }
+                else
+                {
+                    file.NumOfReplacements = numOfReplacements;
+                }
+            });
 
             return didEverythingSucceed;
         }
